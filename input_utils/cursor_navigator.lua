@@ -4,30 +4,55 @@ local vim_mode = require("vim_mode")
 local cursor_navigator = {}
 
 local currentLevel = 0
+local maxLevel = 3
 
-local canvas = nil
+local gridKeys = {"u","i","o","j","k","l","m",",","."}
+local prefixPath = ""
+local highlightId = nil
+
+local bgCanvas = nil
+local gridCanvas = nil
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
-local gridKeys = {"u","i", "o", "j", "k", "l", "m", ",", "."}
-local screenFrame = nil
+local screenFrame = {}
 local font = {
     name = "Monaco",
     size = 16,
-    color = #{hex="#FFFFF"},
+    normalColor = { hex="#FFFFF" },
+    highlightColor = { alpha = 1, red = 1, green = 1, blue = 0 },
 }
 
-local function drawGrid(rect)
-    if canvas then
-        canvas:delete()
+local function drawBgPanel(rect)
+    if bgCanvas then
+        bgCanvas:delete()
     end
 
-    canvas = hs.canvas.new{
+    bgCanvas = hs.canvas.new{
         x = rect.x,
         y = rect.y,
         w = rect.w,
         h = rect.h,
     }:show()
 
-    canvas:appendElements({
+    bgCanvas:appendElements({
+        type = "rectangle",
+        action = "fill",
+        fillColor = { alpha = 0.3, red = 0, green = 0, blue = 0 }
+    })
+end
+
+local function drawGrid(rect)
+    if gridCanvas then
+        gridCanvas:delete()
+    end
+
+    gridCanvas = hs.canvas.new{
+        x = rect.x,
+        y = rect.y,
+        w = rect.w,
+        h = rect.h,
+    }:show()
+
+    gridCanvas:appendElements({
         type = "rectangle",
         action = "fill",
         fillColor = { alpha = 0.5, red = 0, green = 0, blue = 0 },
@@ -41,7 +66,7 @@ local function drawGrid(rect)
         for col = 0, 2 do
             local index = row * 3 + col + 1
             local label = gridKeys[index]
-            canvas:appendElements({
+            gridCanvas:appendElements({
                 {
                     type = "rectangle",
                     action = "stroke",
@@ -70,6 +95,21 @@ local function drawGrid(rect)
             })
         end
     end
+
+    if highlightId then
+        gridCanvas:removeElement(highlightId)
+    end
+    highlightId = gridCanvas:appendElements({
+        type = "rectangle",
+        action = "stroke",
+        fillColor = font.highlightColor, 
+        frame = {
+            x = rect.x - screenFrame.x,
+            y = rect.y - screenFrame.y,
+            w = rect.w,
+            h = rect.h,
+        },
+    })
 end
 
 local function refineGrid(key)
@@ -89,6 +129,7 @@ local function refineGrid(key)
         h = h3,
     }
     currentLevel = currentLevel + 1
+    prefixPath = prefixPath .. key
     drawGrid(currentRect)
 end
 
@@ -150,18 +191,25 @@ end
 
 function cursor_navigator.start()
     currentLevel = 0
+    prefixPath = ""
     screenFrame = hs.screen.mainScreen():frame()
     currentRect = screenFrame
+    drawBgPanel(currentRect)
     drawGrid(currentRect)
 
     master_eventtap.register(navigatorHandler)
 end
 
 function cursor_navigator.stop()
-    if canvas then
-        canvas:delete()
-        canvas = nil
+    if bgCanvas then
+        bgCanvas:delete()
+        bgCanvas = nil
     end
+    if gridCanvas then
+        gridCanvas:delete()
+        gridCanvas = nil
+    end
+    prefixPath = ""
     master_eventtap.unregister(navigatorHandler)
 end
 
