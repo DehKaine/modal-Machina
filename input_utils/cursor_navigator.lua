@@ -21,6 +21,8 @@ local font = {
     highlightColor = { alpha = 1, red = 1, green = 1, blue = 0 },
 }
 
+local subGrids = {}
+
 local function drawBgPanel(rect)
     if bgCanvas then
         bgCanvas:delete()
@@ -54,8 +56,7 @@ local function drawGrid(rect)
 
     gridCanvas:appendElements({
         type = "rectangle",
-        action = "fill",
-        fillColor = { alpha = 0.5, red = 0, green = 0, blue = 0 },
+        action = "stroke",
         strokeColor = { alpha = 0.5, red = 1, green = 1, blue = 1 },
         strokeWidth = 0.5,
     })
@@ -66,7 +67,8 @@ local function drawGrid(rect)
         for col = 0, 2 do
             local index = row * 3 + col + 1
             local label = gridKeys[index]
-            gridCanvas:appendElements({
+
+            local elements = {
                 {
                     type = "rectangle",
                     action = "stroke",
@@ -83,7 +85,7 @@ local function drawGrid(rect)
                     type = "text",
                     text = label,
                     textFont = font.name,
-                    textSize = math.max(6, font.size - currentLevel * 2),
+                    textSize = math.max(6, font.size),
                     textColor = font.color,
                     frame = {
                         x = col * w3 + w3 / 2 - 6,
@@ -92,27 +94,93 @@ local function drawGrid(rect)
                         h = 24,
                     },
                 }
-            })
+            }
+
+            if prefixPath:sub(currentLevel + 1, currentLevel + 1) == label then
+                table.insert(elements, {
+                    type = "rectangle",
+                    action = "fill",
+                    fillColor = { alpha = 0.1, red = 1, green = 1, blue = 0 },
+                    frame = {
+                        x = col * w3,
+                        y = row * h3,
+                        w = w3,
+                        h = h3,
+                    },
+                })
+            end
+
+            gridCanvas:appendElements(elements)
         end
     end
 
-    if highlightId then
-        gridCanvas:removeElement(highlightId)
+    if currentLevel < maxLevel - 1 then
+        local w3, h3 = rect.w / 3, rect.h / 3
+        for row = 0, 2 do
+            for col = 0, 2 do
+                local index = row * 3 + col + 1
+                local key = gridKeys[index]
+                local subRect = {
+                    x = rect.x + col * w3,
+                    y = rect.y + row * h3,
+                    w = w3,
+                    h = h3,
+                }
+                local canvas = hs.canvas.new(subRect):show()
+                subGrids[key] = canvas
+
+                canvas:appendElements({
+                    type = "rectangle",
+                    action = "stroke",
+                    strokeColor = { alpha = 0.15, red = 1, green = 1, blue = 1 },
+                    strokeWidth = 0.5,
+                })
+
+                local pw, ph = subRect.w / 3, subRect.h / 3
+                for subRow = 0, 2 do
+                    for subCol = 0, 2 do
+                        local subIndex = subRow * 3 + subCol + 1
+                        local subKey = gridKeys[subIndex]
+                        canvas:appendElements({
+                            {
+                                type = "rectangle",
+                                action = "stroke",
+                                strokeColor = { alpha = 0.1, red = 1, green = 1, blue = 1 },
+                                strokeWidth = 0.5,
+                                frame = {
+                                    x = subCol * pw,
+                                    y = subRow * ph,
+                                    w = pw,
+                                    h = ph,
+                                },
+                            },
+                            {
+                                type = "text",
+                                text = subKey,
+                                textFont = font.name,
+                                textSize = math.max(6, font.size - 2),
+                                textColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
+                                frame = {
+                                    x = subCol * pw + pw / 2 - 6,
+                                    y = subRow * ph + ph / 2 - 12,
+                                    w = 20,
+                                    h = 24,
+                                },
+                            }
+                        })
+                    end
+                end
+            end
+        end
     end
-    highlightId = gridCanvas:appendElements({
-        type = "rectangle",
-        action = "stroke",
-        fillColor = font.highlightColor, 
-        frame = {
-            x = rect.x - screenFrame.x,
-            y = rect.y - screenFrame.y,
-            w = rect.w,
-            h = rect.h,
-        },
-    })
 end
 
 local function refineGrid(key)
+    for _, canvas in pairs(subGrids) do
+        canvas:delete()
+    end
+    subGrids = {}
+
     local index = hs.fnutils.indexOf(gridKeys, key)
     if not index then
         return
@@ -171,7 +239,8 @@ local function navigatorHandler(event)
     end
     if hs.fnutils.contains(gridKeys, key) then
         refineGrid(key)
-        if currentLevel >= 3 then
+        if currentLevel >= maxLevel then
+            print("Max Level Reached")
             clickCenter()
             cursor_navigator.stop()
         end
@@ -209,6 +278,11 @@ function cursor_navigator.stop()
         gridCanvas:delete()
         gridCanvas = nil
     end
+    for _, canvas in pairs(subGrids) do
+        canvas:delete()
+    end
+    subGrids = {}
+    currentLevel = 0
     prefixPath = ""
     master_eventtap.unregister(navigatorHandler)
 end

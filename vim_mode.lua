@@ -5,7 +5,7 @@ local status = require("ui.statusbar")
 local win_flow = require("input_utils.win_flow")
 -- local cursor_navigator = require("input_utils.cursor_navigator")
 
-local modal = hs.hotkey.modal.new({"ctrl"}, "'")
+local modal = hs.hotkey.modal.new({"alt"}, "space")
 
 local cmdBuffer = ""
 local prefixNumber = ""
