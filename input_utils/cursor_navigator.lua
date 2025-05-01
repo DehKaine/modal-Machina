@@ -19,6 +19,7 @@ local font = {
     size = 16,
     normalColor = { hex="#FFFFF" },
     highlightColor = { alpha = 1, red = 1, green = 1, blue = 0 },
+    color = { alpha = 1, red = 1, green = 1, blue = 1 },
 }
 
 local subGrids = {}
@@ -43,6 +44,18 @@ local function drawBgPanel(rect)
 end
 
 local function drawGrid(rect)
+    -- helper table that keeps track of which codes have already been rendered
+    local seenCodes = {}
+    -- draw the code only if none of its shorter prefixes have been rendered
+    local function should_draw(code)
+        for i = 1, #code - 1 do
+            if seenCodes[code:sub(1, i)] then
+                return false
+            end
+        end
+        return true
+    end
+
     if gridCanvas then
         gridCanvas:delete()
     end
@@ -63,111 +76,227 @@ local function drawGrid(rect)
 
     local w3, h3 = rect.w / 3, rect.h / 3
 
-    for row = 0, 2 do
-        for col = 0, 2 do
-            local index = row * 3 + col + 1
-            local label = gridKeys[index]
-
-            local elements = {
-                {
-                    type = "rectangle",
-                    action = "stroke",
-                    strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
-                    strokeWidth = 0.5,
-                    frame = {
-                        x = col * w3,
-                        y = row * h3,
-                        w = w3,
-                        h = h3,
-                    },
-                },
-                {
-                    type = "text",
-                    text = label,
-                    textFont = font.name,
-                    textSize = math.max(6, font.size),
-                    textColor = font.color,
-                    frame = {
-                        x = col * w3 + w3 / 2 - 6,
-                        y = row * h3 + h3 / 2 - 12,
-                        w = 20,
-                        h = 24,
-                    },
-                }
-            }
-
-            if prefixPath:sub(currentLevel + 1, currentLevel + 1) == label then
-                table.insert(elements, {
-                    type = "rectangle",
-                    action = "fill",
-                    fillColor = { alpha = 0.1, red = 1, green = 1, blue = 0 },
-                    frame = {
-                        x = col * w3,
-                        y = row * h3,
-                        w = w3,
-                        h = h3,
-                    },
-                })
-            end
-
-            gridCanvas:appendElements(elements)
-        end
-    end
-
-    if currentLevel < maxLevel - 1 then
-        local w3, h3 = rect.w / 3, rect.h / 3
+    if currentLevel == 0 then
+        -- Draw level 0 grid with labels
         for row = 0, 2 do
             for col = 0, 2 do
                 local index = row * 3 + col + 1
-                local key = gridKeys[index]
-                local subRect = {
-                    x = rect.x + col * w3,
-                    y = rect.y + row * h3,
+                local k0 = gridKeys[index]
+                local frame0 = {
+                    x = col * w3,
+                    y = row * h3,
                     w = w3,
                     h = h3,
                 }
-                local canvas = hs.canvas.new(subRect):show()
-                subGrids[key] = canvas
-
-                canvas:appendElements({
-                    type = "rectangle",
-                    action = "stroke",
-                    strokeColor = { alpha = 0.15, red = 1, green = 1, blue = 1 },
-                    strokeWidth = 0.5,
+                -- Draw level 0 cell border
+                gridCanvas:appendElements({
+                    {
+                        type = "rectangle",
+                        action = "stroke",
+                        strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
+                        strokeWidth = 0.5,
+                        frame = frame0,
+                    },
                 })
-
-                local pw, ph = subRect.w / 3, subRect.h / 3
+                -- Draw level 1 and level 2 sub grids inside this cell
+                local w9, h9 = w3 / 3, h3 / 3
                 for subRow = 0, 2 do
                     for subCol = 0, 2 do
-                        local subIndex = subRow * 3 + subCol + 1
-                        local subKey = gridKeys[subIndex]
-                        canvas:appendElements({
+                        local index1 = subRow * 3 + subCol + 1
+                        local k1 = gridKeys[index1]
+                        local frame1 = {
+                            x = frame0.x + subCol * w9,
+                            y = frame0.y + subRow * h9,
+                            w = w9,
+                            h = h9,
+                        }
+                        -- Draw level 1 cell border
+                        gridCanvas:appendElements({
                             {
                                 type = "rectangle",
                                 action = "stroke",
-                                strokeColor = { alpha = 0.1, red = 1, green = 1, blue = 1 },
+                                strokeColor = { alpha = 0.15, red = 1, green = 1, blue = 1 },
                                 strokeWidth = 0.5,
-                                frame = {
-                                    x = subCol * pw,
-                                    y = subRow * ph,
-                                    w = pw,
-                                    h = ph,
-                                },
+                                frame = frame1,
                             },
-                            {
-                                type = "text",
-                                text = subKey,
-                                textFont = font.name,
-                                textSize = math.max(6, font.size - 2),
-                                textColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
-                                frame = {
-                                    x = subCol * pw + pw / 2 - 6,
-                                    y = subRow * ph + ph / 2 - 12,
-                                    w = 20,
-                                    h = 24,
-                                },
-                            }
                         })
+                        for subSubRow = 0, 2 do
+                            for subSubCol = 0, 2 do
+                                local index2 = subSubRow * 3 + subSubCol + 1
+                                local k2 = gridKeys[index2]
+                                local frame2 = {
+                                    x = frame1.x + subSubCol * (w9 / 3),
+                                    y = frame1.y + subSubRow * (h9 / 3),
+                                    w = w9 / 3,
+                                    h = h9 / 3,
+                                }
+                                -- Draw level 2 cell border
+                                gridCanvas:appendElements({
+                                    {
+                                        type = "rectangle",
+                                        action = "stroke",
+                                        strokeColor = { alpha = 0.1, red = 1, green = 1, blue = 1 },
+                                        strokeWidth = 0.5,
+                                        frame = frame2,
+                                    },
+                                })
+                                -- Compose the 3-char code
+                                local code = prefixPath .. k0 .. k1 .. k2
+                                if should_draw(code) then
+                                    seenCodes[code] = true
+                                    gridCanvas:appendElements({
+                                        {
+                                            type = "text",
+                                            text = code,
+                                            textFont = font.name,
+                                            textSize = 8,
+                                            textColor = font.color,
+                                            frame = {
+                                                x = frame2.x + frame2.w / 2 - 10,
+                                                y = frame2.y + frame2.h / 2 - 8,
+                                                w = 20,
+                                                h = 16,
+                                            },
+                                        }
+                                    })
+                                end
+                            end
+                        end
+                        -- Draw the 2-char code text centered in level 1 cell
+                        local code1 = prefixPath .. k0 .. k1
+                        if should_draw(code1) then
+                            seenCodes[code1] = true
+                            gridCanvas:appendElements({
+                                {
+                                    type = "text",
+                                    text = code1,
+                                    textFont = font.name,
+                                    textSize = 12,
+                                    textColor = font.color,
+                                    frame = {
+                                        x = frame1.x + frame1.w / 2 - 12,
+                                        y = frame1.y + frame1.h / 2 - 12,
+                                        w = 24,
+                                        h = 24,
+                                    },
+                                }
+                            })
+                        end
+                    end
+                end
+                -- draw the 1-char (level-0) code
+                local code0 = prefixPath .. k0
+                if should_draw(code0) then
+                    seenCodes[code0] = true
+                    gridCanvas:appendElements({
+                        {
+                            type = "text",
+                            text = code0,
+                            textFont = font.name,
+                            textSize = 20,
+                            textColor = font.color,
+                            frame = {
+                                x = frame0.x + frame0.w / 2 - 14,
+                                y = frame0.y + frame0.h / 2 - 16,
+                                w = 28,
+                                h = 32,
+                            },
+                        }
+                    })
+                end
+            end
+        end
+    else
+        -- Original drawGrid behavior for currentLevel > 0
+        for row = 0, 2 do
+            for col = 0, 2 do
+                local index = row * 3 + col + 1
+                local label = gridKeys[index]
+                gridCanvas:appendElements({
+                    {
+                        type = "rectangle",
+                        action = "stroke",
+                        strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
+                        strokeWidth = 0.5,
+                        frame = {
+                            x = col * w3,
+                            y = row * h3,
+                            w = w3,
+                            h = h3,
+                        },
+                    },
+                    {
+                        type = "text",
+                        text = label,
+                        textFont = font.name,
+                        textSize = math.max(6, font.size),
+                        textColor = font.color,
+                        frame = {
+                            x = col * w3 + w3 / 2 - 6,
+                            y = row * h3 + h3 / 2 - 12,
+                            w = 20,
+                            h = 24,
+                        },
+                    }
+                })
+            end
+        end
+
+        if currentLevel < maxLevel - 1 then
+            local w3, h3 = rect.w / 3, rect.h / 3
+            for row = 0, 2 do
+                for col = 0, 2 do
+                    local index = row * 3 + col + 1
+                    local key = gridKeys[index]
+                    local subRect = {
+                        x = rect.x + col * w3,
+                        y = rect.y + row * h3,
+                        w = w3,
+                        h = h3,
+                    }
+                    local canvas = hs.canvas.new(subRect):show()
+                    subGrids[key] = canvas
+
+                    canvas:appendElements({
+                        type = "rectangle",
+                        action = "stroke",
+                        strokeColor = { alpha = 0.15, red = 1, green = 1, blue = 1 },
+                        strokeWidth = 0.5,
+                    })
+
+                    local pw, ph = subRect.w / 3, subRect.h / 3
+                    for subRow = 0, 2 do
+                        for subCol = 0, 2 do
+                            local subIndex = subRow * 3 + subCol + 1
+                            local subKey = gridKeys[subIndex]
+                            canvas:appendElements({
+                                {
+                                    type = "rectangle",
+                                    action = "stroke",
+                                    strokeColor = { alpha = 0.1, red = 1, green = 1, blue = 1 },
+                                    strokeWidth = 0.5,
+                                    frame = {
+                                        x = subCol * pw,
+                                        y = subRow * ph,
+                                        w = pw,
+                                        h = ph,
+                                    },
+                                },
+                                {
+                                    type = "text",
+                                    text = subKey,
+                                    textFont = font.name,
+                                    textSize = math.max(6, font.size - 2),
+                                    textColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
+                                    frame = {
+                                        x = subCol * pw + pw / 2 - 6,
+                                        y = subRow * ph + ph / 2 - 12,
+                                        w = 20,
+                                        h = 24,
+                                    },
+                                }
+                            })
+                        end
                     end
                 end
             end
