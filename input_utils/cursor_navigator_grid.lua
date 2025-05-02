@@ -3,39 +3,21 @@ local vim_mode = require("vim_mode")
 
 local cursor_navigator = {}
 
-local currentDepth = 0
-local maxDepth = 3
+local currentLevel = 0
+local maxLevel = 3
 
--- keys
-local directionKeys = {"u","i","o",
-                       "j",    "l",
-                       "h","k",";"}
-local goLastPointKeys = {"."}
+local gridKeys = {"u","i","o","j","k","l","m",",","."}
+local prefixPath = ""
 
--- canvas
 local bgCanvas = nil
 local gridCanvas = nil
-local anchorCanvas = nil
-local crossHairCanvas = nil
-local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
--- vector2 pointer
-local defaultPointer = {x = 0, y = 0}
-local currentPointer = {x = 0, y = 0}
-local lastClickedPointer = {x = 0, y = 0}
--- UI
-local crossHair = {
-    type = "crossHar",
-    action = "fill",
-    fillColor = { alpha = 0.3, red = 1, green = 1, blue = 0 },
-    strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 0 },
-    strokeWidth = 0.5,
-}
+local screenFrame = {}
 local font = {
     name = "Monaco",
     size = 16,
-    normalColor = { alpha = 0.7, red = 1, green = 1, blue = 1 },
-    underlayColor = { alpha = 0.4, red = 1, green = 1, blue = 0 },
+    normalColor = { hex="#FFFFF" },
+    highlightColor = { alpha = 1, red = 1, green = 1, blue = 0 },
 }
 
 local function drawBgPanel(rect)
@@ -52,9 +34,8 @@ local function drawBgPanel(rect)
 
     bgCanvas:appendElements({
         type = "rectangle",
-        action = "stroke",
-        strokeColor = { alpha = 0.3, red = 0, green = 0, blue = 1 },
-        strokeWidth = 0.5,
+        action = "fill",
+        fillColor = { alpha = 0.3, red = 0, green = 0, blue = 0 }
     })
 end
 
@@ -78,12 +59,12 @@ local function drawGrid(rect)
         strokeWidth = 0.5,
     })
 
-    local cellWidth, cellHeight = rect.w / 3, rect.h / 3
+    local w3, h3 = rect.w / 3, rect.h / 3
 
     for row = 0, 2 do
         for col = 0, 2 do
             local index = row * 3 + col + 1
-            local label = directionKeys[index]
+            local label = gridKeys[index]
             gridCanvas:appendElements({
                 {
                     type = "rectangle",
@@ -91,21 +72,21 @@ local function drawGrid(rect)
                     strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
                     strokeWidth = 0.5,
                     frame = {
-                        x = col * cellWidth,
-                        y = row * cellHeight,
-                        w = cellWidth,
-                        h = cellHeight,
+                        x = col * w3,
+                        y = row * h3,
+                        w = w3,
+                        h = h3,
                     },
                 },
                 {
                     type = "text",
                     text = label,
                     textFont = font.name,
-                    textSize = math.max(6, font.size - currentDepth * 2),
+                    textSize = math.max(6, font.size - currentLevel * 2),
                     textColor = font.color,
                     frame = {
-                        x = col * cellWidth + cellWidth / 2 - 6,
-                        y = row * cellHeight + cellHeight / 2 - 12,
+                        x = col * w3 + w3 / 2 - 6,
+                        y = row * h3 + h3 / 2 - 12,
                         w = 20,
                         h = 24,
                     },
@@ -116,7 +97,7 @@ local function drawGrid(rect)
 end
 
 local function refineGrid(key)
-    local index = hs.fnutils.indexOf(directionKeys, key)
+    local index = hs.fnutils.indexOf(gridKeys, key)
     if not index then
         return
     end
@@ -124,68 +105,21 @@ local function refineGrid(key)
     local row = math.floor((index - 1) / 3)
     local col = (index - 1) % 3
 
-    local cellWidth, cellHeight = currentRect.w / 3, currentRect.h / 3
+    local w3, h3 = currentRect.w / 3, currentRect.h / 3
     currentRect = {
-        x = currentRect.x + col * cellWidth,
-        y = currentRect.y + row * cellHeight,
-        w = cellWidth,
-        h = cellHeight,
+        x = currentRect.x + col * w3,
+        y = currentRect.y + row * h3,
+        w = w3,
+        h = h3,
     }
-    currentDepth = currentDepth + 1
+    currentLevel = currentLevel + 1
+    prefixPath = prefixPath .. key
     drawGrid(currentRect)
 end
 
-local function drawAnchor(rect)
-    if anchorCanvas then
-        anchorCanvas:delete()
-    end
-
-    anchorCanvas = hs.canvas.new{
-        x = currentRect.x,
-        y = currentRect.y,
-        w = currentRect.w,
-        h = currentRect.h,
-    }:show()
-
-    anchorCanvas:appendElements({
-        type = "text",
-        text = "",
-        textFont = font.name,
-        textSize = font.size,
-        textColor = font.normalColor,
-        frame = {
-            x = rect.x + rect.w / 2 - 6,
-            y = rect.y + rect.h / 2 - 12,
-            w = 20,
-            h = 24,
-        },
-        action = "fill",
-        fillColor = font.underlayColor,
-        strokeColor = font.underlayColor,
-        strokeWidth = 0.5,
-    })
-end
-
-local function drawCrossHair()
-    if crossHairCanvas then
-        crossHairCanvas:delete()
-    end
-
-    crossHairCanvas = hs.canvas.new{
-        x = screenFrame.x,
-        y = screenFrame.y,
-        w = screenFrame.w,
-        h = screenFrame.h,
-    }:show()
-
-    crossHairCanvas:appendElements(
-        crossHair
-    )
-end
-
-local function clickPointer()
+local function clickCenter()
     local center = nil
-    if currentDepth == 0 then
+    if currentLevel == 0 then
         local screenFrame = hs.screen.mainScreen():frame()
         center = {
             x = screenFrame.x + screenFrame.w / 2,
@@ -218,19 +152,19 @@ local function navigatorHandler(event)
         cursor_navigator.stop()
         return true
     end
-    if hs.fnutils.contains(directionKeys, key) then
+    if hs.fnutils.contains(gridKeys, key) then
         refineGrid(key)
-        if currentDepth >= 3 then
-            clickPointer()
+        if currentLevel >= 3 then
+            clickCenter()
             cursor_navigator.stop()
         end
         return true
     elseif key == " " then
-        if currentDepth == 0 then
-            clickPointer()
+        if currentLevel == 0 then
+            clickCenter()
             cursor_navigator.stop()
         else
-            clickPointer()
+            clickCenter()
             cursor_navigator.stop()
         end
         return true
@@ -239,17 +173,12 @@ local function navigatorHandler(event)
 end
 
 function cursor_navigator.start()
-    currentDepth = 0
+    currentLevel = 0
+    prefixPath = ""
     screenFrame = hs.screen.mainScreen():frame()
-    defaultPointer = {
-        x = screenFrame.w / 2,
-        y = screenFrame.h / 2,
-    }
     currentRect = screenFrame
     drawBgPanel(currentRect)
     drawGrid(currentRect)
-    drawAnchor(currentRect)
-    drawCrossHair()
 
     master_eventtap.register(navigatorHandler)
 end
@@ -263,14 +192,7 @@ function cursor_navigator.stop()
         gridCanvas:delete()
         gridCanvas = nil
     end
-    if anchorCanvas then
-        anchorCanvas:delete()
-        anchorCanvas = nil
-    end
-    if crossHairCanvas then
-        crossHairCanvas:delete()
-        crossHairCanvas = nil
-    end
+    prefixPath = ""
     master_eventtap.unregister(navigatorHandler)
 end
 

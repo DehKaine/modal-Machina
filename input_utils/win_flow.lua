@@ -1,7 +1,7 @@
 local win_flow = {}
 
 local focus_map = {
-    fw = "We Chat",
+    fw = "WeChat.app",
     fi = "Finder",
     fo = "Fork",
     fe = "Eagle",

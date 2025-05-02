@@ -76,6 +76,9 @@ local command_map = {
         hs.eventtap.keyStroke({}, "forwarddelete", 0)
         hs.eventtap.keyStroke({}, "forwarddelete", 0)
     end,
+    ["sl"] = function()
+        hs.eventtap.keyStroke({"ctrl", "cmd"}, "q", 0)
+    end,
     -- focus app by cmd
     ["fw"] = function()
         win_flow.focusToAppByCmd("fw")
