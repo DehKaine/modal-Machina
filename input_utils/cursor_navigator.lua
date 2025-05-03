@@ -3,15 +3,14 @@ local vim_mode = require("vim_mode")
 
 local cursor_navigator = {}
 
+-- depth
 local currentDepth = 0
 local maxDepth = 3
-
 -- keys
 local directionKeys = {"u","i","o",
                        "j",    "l",
                        "h","k",";"}
 local goLastPointKeys = {"."}
-
 -- canvas
 local bgCanvas = nil
 local gridCanvas = nil
@@ -20,7 +19,6 @@ local crossHairCanvas = nil
 local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
 -- vector2 pointer
-local defaultPointer = {x = 0, y = 0}
 local currentPointer = {x = 0, y = 0}
 local lastClickedPointer = {x = 0, y = 0}
 -- UI
@@ -183,28 +181,21 @@ local function drawCrossHair()
     )
 end
 
-local function clickPointer()
-    local center = nil
-    if currentDepth == 0 then
-        local screenFrame = hs.screen.mainScreen():frame()
-        center = {
-            x = screenFrame.x + screenFrame.w / 2,
-            y = screenFrame.y + screenFrame.h / 2,
-        }
-    else
-        center = {
-            x = currentRect.x + currentRect.w / 2,
-            y = currentRect.y + currentRect.h / 2,
-        }
-    end
-    hs.mouse.absolutePosition(center)
+local function clickPointer(currentPointer)
+    local point = currentPointer
+    hs.mouse.absolutePosition(point)
+
     local clickDown = hs.eventtap.event.newMouseEvent(
-        hs.eventtap.event.types.leftMouseDown,
-        {x = center.x, y = center.y}
+        hs.eventtap.event.types.leftMouseDown, {
+            x = point.x,
+            y = point.y
+        }
     )
     local clickUp = hs.eventtap.event.newMouseEvent(
-        hs.eventtap.event.types.leftMouseUp,
-        {x = center.x, y = center.y}
+        hs.eventtap.event.types.leftMouseUp, {
+            x = point.x,
+            y = point.y
+        }
     )
 
     clickDown:post()
@@ -241,7 +232,7 @@ end
 function cursor_navigator.start()
     currentDepth = 0
     screenFrame = hs.screen.mainScreen():frame()
-    defaultPointer = {
+    currentPointer = {
         x = screenFrame.w / 2,
         y = screenFrame.h / 2,
     }

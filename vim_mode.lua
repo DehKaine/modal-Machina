@@ -83,6 +83,9 @@ local command_map = {
     ["fw"] = function()
         win_flow.focusToAppByCmd("fw")
     end,
+    ["ft"] = function()
+        win_flow.focusToAppByCmd("ft")
+    end,
     ["fi"] = function()
         win_flow.focusToAppByCmd("fi")
     end,
