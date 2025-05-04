@@ -33,12 +33,11 @@ local multiKeyMap = {
     ["alt-o"] = { key = "pagedown", mods = {} },
     ["alt-y"] = { key = "up", mods = {"cmd"} },
     ["alt-p"] = { key = "down", mods = {"alt", "shift"} },
-    -- ["shift-space"] = { key = "space", mods = {"cmd"} },
 }
 
 hs.hotkey.bind({"shift"}, "space", function()
     local current = hs.execute("/opt/homebrew/bin/im-select"):gsub("%s+", "")
-    if current ~= "com.sougou.inputmethod.sogou.pinyin" then
+    if current ~= "com.sogou.inputmethod.sogou.pinyin" then
         hs.execute("/opt/homebrew/bin/im-select com.sogou.inputmethod.sogou.pinyin")
     else
         hs.execute("/opt/homebrew/bin/im-select com.apple.keylayout.ABC")
