@@ -127,6 +127,7 @@ local command_map = {
     -- reload hammerspoon
     ["rhs"] = function ()
         print("Vim Mode: Reloading Hammerspoon")
+        print("==========>  NEW MACHINA  ==========>")
         hs.timer.doAfter(0.2, function()
             hs.reload()
         end)

@@ -3,15 +3,17 @@ local vim_mode = require("vim_mode")
 
 local media_controller = {}
 
-local mediaKeys = {
-    b = "brightness_down",
-    n = "brightness_up",
-    m = "volume_decrement",
-    comma = "volume_increment",
-    period = "mute",
-    space = "playpause",
-    left = "previous",
-    right = "next",
+local modal = hs.hotkey.modal.new({"alt"}, "m")
+
+local mediaKeyMap = {
+    ["a"] = "BRIGHTNESS_DOWN",
+    ["s"] = "BRIGHTNESS_UP",
+    ["d"] = "VOLUME_DOWN",
+    ["f"] = "VOLUME_UP",
+    ["g"] = "MUTE",
+    ["h"] = "PLAY",
+    ["j"] = "PREVIOUS",
+    ["k"] = "NEXT",
 }
 
 local bgCanvas = nil
@@ -19,7 +21,7 @@ local eventtap = nil
 
 local font = {
     name = "Monaco",
-    size = 18,
+    size = 14,
     color = { white = 1, alpha = 0.8 },
 }
 
@@ -30,7 +32,7 @@ local function drawPanel()
 
     local screenFrame = hs.screen.mainScreen():frame()
     local width = 400
-    local height = 100
+    local height = 120
     local x = screenFrame.x + (screenFrame.w - width) / 2
     local y = screenFrame.y + (screenFrame.h - height) / 2
 
@@ -43,7 +45,7 @@ local function drawPanel()
     })
 
     local keys = {}
-    for k, _ in pairs(mediaKeys) do
+    for k, _ in pairs(mediaKeyMap) do
         table.insert(keys, k)
     end
     table.sort(keys)
@@ -53,12 +55,7 @@ local function drawPanel()
     local buttonHeight = height
 
     for i, key in ipairs(keys) do
-        local label = key
-        if key == "comma" then label = "," end
-        if key == "period" then label = "." end
-        if key == "space" then label = "space" end
-        if key == "left" then label = "←" end
-        if key == "right" then label = "→" end
+        local label = key .. "\n" .. (mediaKeyMap[key] or "")
 
         bgCanvas:appendElements({
             {
@@ -92,7 +89,7 @@ local function drawPanel()
 end
 
 local function triggerMedia(key)
-    local action = mediaKeys[key]
+    local action = mediaKeyMap[key]
     if not action then return end
     local event = hs.eventtap.event.newSystemKeyEvent(action, true)
     event:post()
@@ -102,39 +99,43 @@ end
 
 local function mediaHandler(event)
     local key = event:getCharacters(true)
-    if mediaKeys[key] then
+    if key == nil then return false end
+    if mediaKeyMap[key] then
         triggerMedia(key)
         return true
     elseif key == "escape" then
-        media_controller.stop()
+        modal:exit()
         return true
     end
     return false
 end
 
-function media_controller.start()
+function modal:entered()
+    if vim_mode then
+        vim_mode.exitVim()
+    end
     drawPanel()
-    if eventtap then
-        eventtap:stop()
-        eventtap = nil
-    end
-    eventtap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, mediaHandler)
-    eventtap:start()
+    master_eventtap.register(mediaHandler)
 end
 
-function media_controller.stop()
-    if bgCanvas then
-        bgCanvas:delete()
-        bgCanvas = nil
-    end
-    if eventtap then
-        eventtap:stop()
-        eventtap = nil
-    end
+function modal:exited()
+    if bgCanvas then bgCanvas:delete() bgCanvas = nil end
+    if eventtap then eventtap:stop() eventtap = nil end
+    master_eventtap.unregister(mediaHandler)
 end
 
-hs.hotkey.bind({"alt"}, "m", function()
-    media_controller.start()
+modal:bind({},"escape",function ()
+    modal:exit()
 end)
+
+-- hs.hotkey.bind({"alt"}, "b", function()
+--     hs.alert.show("mute debug")
+--     local key = "MUTE"
+--     local event = hs.eventtap.event.newSystemKeyEvent(key, true)
+--     event:post()
+--     hs.timer.usleep(10000)
+--     local eventUp = hs.eventtap.event.newSystemKeyEvent(key,false)
+--     eventUp:post()
+-- end)
 
 return media_controller
