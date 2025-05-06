@@ -128,14 +128,4 @@ modal:bind({},"escape",function ()
     modal:exit()
 end)
 
--- hs.hotkey.bind({"alt"}, "b", function()
---     hs.alert.show("mute debug")
---     local key = "MUTE"
---     local event = hs.eventtap.event.newSystemKeyEvent(key, true)
---     event:post()
---     hs.timer.usleep(10000)
---     local eventUp = hs.eventtap.event.newSystemKeyEvent(key,false)
---     eventUp:post()
--- end)
-
 return media_controller

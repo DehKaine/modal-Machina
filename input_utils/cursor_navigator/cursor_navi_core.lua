@@ -1,7 +1,10 @@
 local master_eventtap = require("master_eventtap")
 local vim_mode = require("vim.vim_core")
-
+--
+local Crosshair = require("input_utils.cursor_navigator.crosshair")
+--
 local cursor_navigator = {}
+local modal = hs.hotkey.modal.new({"alt"}, "c")
 
 -- depth
 local currentDepth = 0
@@ -15,20 +18,13 @@ local goLastPointKeys = {"."}
 local bgCanvas = nil
 local gridCanvas = nil
 local anchorCanvas = nil
-local crossHairCanvas = nil
 local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
 -- vector2 pointer
 local currentPointer = {x = 0, y = 0}
 local lastClickedPointer = {x = 0, y = 0}
 -- UI
-local crossHair = {
-    type = "crossHar",
-    action = "fill",
-    fillColor = { alpha = 0.3, red = 1, green = 1, blue = 0 },
-    strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 0 },
-    strokeWidth = 0.5,
-}
+local crosshair = Crosshair:new(hs.screen.mainScreen())
 local font = {
     name = "Monaco",
     size = 16,
@@ -164,23 +160,6 @@ local function drawAnchor(rect)
     })
 end
 
-local function drawCrossHair()
-    if crossHairCanvas then
-        crossHairCanvas:delete()
-    end
-
-    crossHairCanvas = hs.canvas.new{
-        x = screenFrame.x,
-        y = screenFrame.y,
-        w = screenFrame.w,
-        h = screenFrame.h,
-    }:show()
-
-    crossHairCanvas:appendElements(
-        crossHair
-    )
-end
-
 local function clickPointer(currentPointer)
     local point = currentPointer
     hs.mouse.absolutePosition(point)
@@ -204,32 +183,28 @@ local function clickPointer(currentPointer)
 end
 
 local function navigatorHandler(event)
-    local key = event:getCharacters(true)
-    if key == "escape" then
-        cursor_navigator.stop()
-        return true
-    end
-    if hs.fnutils.contains(directionKeys, key) then
-        refineGrid(key)
-        if currentDepth >= 3 then
-            clickPointer()
-            cursor_navigator.stop()
-        end
-        return true
-    elseif key == " " then
-        if currentDepth == 0 then
-            clickPointer()
-            cursor_navigator.stop()
-        else
-            clickPointer()
-            cursor_navigator.stop()
-        end
-        return true
-    end
-    return false
+    -- local key = event:getCharacters(true)
+    -- if hs.fnutils.contains(directionKeys, key) then
+    --     refineGrid(key)
+    --     if currentDepth >= 3 then
+    --         clickPointer()
+    --         cursor_navigator.stop()
+    --     end
+    --     return true
+    -- elseif key == " " then
+    --     if currentDepth == 0 then
+    --         clickPointer()
+    --         cursor_navigator.stop()
+    --     else
+    --         clickPointer()
+    --         cursor_navigator.stop()
+    --     end
+    --     return true
+    -- end
+    -- return false
 end
 
-function cursor_navigator.start()
+local function init_navigator()
     currentDepth = 0
     screenFrame = hs.screen.mainScreen():frame()
     currentPointer = {
@@ -237,39 +212,31 @@ function cursor_navigator.start()
         y = screenFrame.h / 2,
     }
     currentRect = screenFrame
-    drawBgPanel(currentRect)
-    drawGrid(currentRect)
-    drawAnchor(currentRect)
-    drawCrossHair()
-
-    master_eventtap.register(navigatorHandler)
+    -- drawBgPanel(currentRect)
+    -- drawGrid(currentRect)
+    -- drawAnchor(currentRect)
+    crosshair:show()
 end
 
-function cursor_navigator.stop()
-    if bgCanvas then
-        bgCanvas:delete()
-        bgCanvas = nil
-    end
-    if gridCanvas then
-        gridCanvas:delete()
-        gridCanvas = nil
-    end
-    if anchorCanvas then
-        anchorCanvas:delete()
-        anchorCanvas = nil
-    end
-    if crossHairCanvas then
-        crossHairCanvas:delete()
-        crossHairCanvas = nil
-    end
-    master_eventtap.unregister(navigatorHandler)
-end
-
-hs.hotkey.bind({"alt"}, "c", function()
+function modal:entered()
     if vim_mode then
         vim_mode.exitVim()
     end
-    cursor_navigator.start()
+    init_navigator()
+    master_eventtap.register(navigatorHandler)
+end
+
+function modal:exited()
+    crosshair:hide()
+    master_eventtap.unregister(navigatorHandler)
+end
+
+modal:bind({},"space", function()
+    clickPointer(currentPointer)
+end)
+
+modal:bind({},"escape", function()
+    modal:exit()
 end)
 
 return cursor_navigator
