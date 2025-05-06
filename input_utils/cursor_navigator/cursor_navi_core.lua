@@ -24,7 +24,7 @@ local currentRect = {x = 0, y = 0, w = 0, h = 0}
 local currentPointer = {x = 0, y = 0}
 local lastClickedPointer = {x = 0, y = 0}
 -- UI
-local crosshair = Crosshair:new(hs.screen.mainScreen())
+local crosshair = Crosshair:new()
 local font = {
     name = "Monaco",
     size = 16,
@@ -206,7 +206,7 @@ end
 
 local function init_navigator()
     currentDepth = 0
-    screenFrame = hs.screen.mainScreen():frame()
+    screenFrame = hs.screen.mainScreen():fullFrame()
     currentPointer = {
         x = screenFrame.w / 2,
         y = screenFrame.h / 2,
@@ -215,7 +215,7 @@ local function init_navigator()
     -- drawBgPanel(currentRect)
     -- drawGrid(currentRect)
     -- drawAnchor(currentRect)
-    crosshair:show()
+    crosshair:show(currentRect)
 end
 
 function modal:entered()
@@ -227,7 +227,7 @@ function modal:entered()
 end
 
 function modal:exited()
-    crosshair:hide()
+    crosshair:destroy()
     master_eventtap.unregister(navigatorHandler)
 end
 
