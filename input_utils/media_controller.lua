@@ -1,5 +1,5 @@
 local master_eventtap = require("master_eventtap")
-local vim_mode = require("vim_mode")
+local vim_mode = require("vim.vim_core")
 
 local media_controller = {}
 

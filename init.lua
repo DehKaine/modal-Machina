@@ -2,7 +2,7 @@
 require("configs.configs")
 
 -- vim
-require("vim_mode")
+require("vim.vim_core")
 
 -- input_utils
 require("input_utils.cursor_navigator")
