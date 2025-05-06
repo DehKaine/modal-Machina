@@ -1,9 +1,12 @@
-local vim_mode = {}
-
 local master_eventtap = require("master_eventtap")
 local status = require("ui.statusbar")
 local win_flow = require("input_utils.win_flow")
--- local cursor_navigator = require("input_utils.cursor_navigator")
+local vim_cmds = require("vim.vim_cmds")
+--
+local vim_core = {}
+--
+local command_map = vim_cmds.map
+local single_exec_commands = vim_cmds.single_exec_cmds
 
 local modal = hs.hotkey.modal.new({"alt"}, "space")
 
@@ -23,119 +26,6 @@ local function resetExitTimer()
         end)
     end)
 end
-
-local command_map = {
-    -- save & close
-    ["wq"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "s", 0)
-        hs.eventtap.keyStroke({"cmd"}, "w", 0)
-    end,
-    -- restore Minized windows
-    ["rw"] = function()
-        win_flow.restoreFrontmostApp()
-    end,
-    -- copy current line
-    ["yy"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "left", 0)
-        hs.eventtap.keyStroke({"shift", "cmd"}, "right", 0)
-        hs.eventtap.keyStroke({"cmd"}, "c", 0)
-        hs.eventtap.keyStroke({"cmd"}, "v", 0)
-    end,
-    -- newline to next line 
-    ["o"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "right", 0)
-        hs.eventtap.keyStroke({}, "return", 0)
-    end,
-    -- newlint to previous line
-    ["O"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "left", 0)
-        hs.eventtap.keyStroke({}, "return", 0)
-        hs.eventtap.keyStroke({}, "up", 0)
-    end,
-    -- paste to next line
-    ["p"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "left", 0)
-        hs.eventtap.keyStroke({"cmd"}, "right", 0)
-        hs.eventtap.keyStroke({}, "return", 0)
-        hs.timer.doAfter(0.1, function()
-            hs.eventtap.keyStroke({"cmd"}, "v", 0)
-        end)
-    end,
-    -- delete current line
-    ["dd"] = function()
-        hs.eventtap.keyStroke({"cmd"}, "left", 0)
-        hs.eventtap.keyStroke({"shift", "cmd"}, "right", 0)
-        hs.eventtap.keyStroke({"cmd"}, "c", 0)
-        hs.eventtap.keyStroke({}, "forwarddelete", 0)
-        hs.eventtap.keyStroke({}, "forwarddelete", 0)
-    end,
-    -- delete line forward from cursor
-    ["df"] = function()
-        hs.eventtap.keyStroke({"shift", "cmd"}, "right", 0)
-        hs.eventtap.keyStroke({"cmd"}, "c", 0)
-        hs.eventtap.keyStroke({}, "forwarddelete", 0)
-        hs.eventtap.keyStroke({}, "forwarddelete", 0)
-    end,
-    ["sl"] = function()
-        hs.eventtap.keyStroke({"ctrl", "cmd"}, "q", 0)
-    end,
-    -- focus app by cmd
-    ["fw"] = function()
-        win_flow.focusToAppByCmd("fw")
-    end,
-    ["ft"] = function()
-        win_flow.focusToAppByCmd("ft")
-    end,
-    ["fi"] = function()
-        win_flow.focusToAppByCmd("fi")
-    end,
-    ["fo"] = function()
-        win_flow.focusToAppByCmd("fo")
-    end,
-    ["fe"] = function()
-        win_flow.focusToAppByCmd("fe")
-    end,
-    ["fg"] = function()
-        win_flow.focusToAppByCmd("fg")
-    end,
-    ["fc"] = function()
-        win_flow.focusToAppByCmd("fc")
-    end,
-    ["fv"] = function()
-        win_flow.focusToAppByCmd("fv")
-    end,
-    -- vim left
-    ["h"] = function()
-        hs.eventtap.keyStroke({}, "left", 0)
-    end,
-    -- vim down
-    ["j"] = function()
-        hs.eventtap.keyStroke({}, "down", 0)
-    end,
-    -- vim up
-    ["k"] = function()
-        hs.eventtap.keyStroke({}, "up", 0)
-    end,
-    -- vim right
-    ["l"] = function()
-        hs.eventtap.keyStroke({}, "right", 0)
-    end,
-    -- -- cursor_navigator
-    -- ["cc"] = function()
-    --     cursor_navigator.start()
-    -- end,
-    -- reload hammerspoon
-    ["rhs"] = function ()
-        print("Vim Mode: Reloading Hammerspoon")
-        print("==========>  NEW MACHINA  ==========>")
-        hs.timer.doAfter(0.2, function()
-            hs.reload()
-        end)
-    end
-}
-
--- 只执行一次的指令集合
-local single_exec_commands = {"wq","yy","dd"}
 
 local function is_single_exec_command(cmd)
     for _, v in ipairs(single_exec_commands) do
@@ -261,8 +151,8 @@ modal:bind({}, "escape", function()
     end)
 end)
 
-function vim_mode.exitVim()
+function vim_core.exitVim()
     modal:exit()
 end
 
-return vim_mode
+return vim_core

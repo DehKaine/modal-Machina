@@ -5,7 +5,7 @@ require("configs.configs")
 require("vim.vim_core")
 
 -- input_utils
-require("input_utils.cursor_navigator")
+require("input_utils.cursor_navigator.cursor_navi_core")
 require("input_utils.single_key")
 require("input_utils.multi_keys")
 require("input_utils.win_flow")
