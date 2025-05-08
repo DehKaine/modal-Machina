@@ -1,5 +1,6 @@
 local master_eventtap = require("master_eventtap")
 local vim_mode = require("vim.vim_core")
+local Tween = require("animation.tween")
 --
 local Crosshair = require("input_utils.cursor_navigator.crosshair")
 --
@@ -225,6 +226,30 @@ function modal:entered()
     init_navigator()
     master_eventtap.register(navigatorHandler)
 end
+
+-- Test: Move crosshair downward when "k" is pressed in modal
+modal:bind({}, "k", function()
+    local targetPointer = {
+        x = currentPointer.x + 50,
+        y = currentPointer.y + 50
+    }
+    local step = 10
+    local interval = 0.1
+    local moved = 0
+
+    hs.timer.doUntil(
+        function() return moved >= 50 end,
+        function()
+            moved = moved + step
+            crosshair:moveTo(targetPointer.x, targetPointer.y)
+        end,
+        interval
+    )
+    -- Tween.move(currentPointer, targetPointer, 0.1, function (pos)
+    --     Crosshair.move(crosshair, pos)
+    -- end)
+
+end)
 
 function modal:exited()
     crosshair:destroy()
