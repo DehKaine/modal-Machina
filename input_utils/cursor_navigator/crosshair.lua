@@ -30,10 +30,6 @@ function Crosshair:moveTo(x, y)
     self.canvas[4].coordinates = { {x = x, y = 0}, {x = x, y = h} }
 end
 
-function Crosshair:move(instance, pos)
-    instance:moveTo(pos.x, pos.y)
-end
-
 function Crosshair:hide()
     if self.canvas then self.canvas:hide() end
 end
