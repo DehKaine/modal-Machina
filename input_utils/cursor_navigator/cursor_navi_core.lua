@@ -16,6 +16,11 @@ local directionKeys = {"u","i","o",
                        "j",    "l",
                        "h","k",";"}
 local goLastPointKeys = {"."}
+local keyToAnchorMap = {
+    u = {r = 2, c = 2}, i = {r = 2, c = 3}, o = {r = 2, c = 4},
+    j = {r = 3, c = 2},                     l = {r = 3, c = 4},
+    h = {r = 4, c = 2}, k = {r = 4, c = 3}, [";"] = {r = 4, c = 4}
+}
 -- screen & canvas
 local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
@@ -152,7 +157,7 @@ local function init_navigator()
     }
     currentRect = screenFrame
     naviCanvas:drawMask()
-    naviCanvas:drawGrid()
+    naviCanvas:drawAssistCanvas()
     crosshair:show(currentRect)
 end
 
@@ -175,7 +180,7 @@ modal:bind({}, "k", function()
     end)
     currentPointer = targetPointer
     naviCanvas:refineMask({x=0,y=0,w=400,h=300})
-    naviCanvas:drawGrid({x=0,y=0,w=400,h=300})
+    naviCanvas:drawAssistCanvas({x=0,y=0,w=400,h=300})
 end)
 
 function modal:exited()

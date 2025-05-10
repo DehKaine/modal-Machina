@@ -7,13 +7,14 @@ style.grid = {
     strokeWidth = 1,
 }
 
-style.anchorItem = {}
 
-style.anchorFont = {
-    name = "Monaco",
-    size = 16,
+style.anchor = {
     normalColor = { alpha = 0.7, red = 1, green = 1, blue = 1 },
     underlayColor = { alpha = 0.4, red = 1, green = 1, blue = 0 },
+    fontName = "Monaco",
+    fontSize = 16,
+    radius = 4,
+    padding = 6
 }
 
 return style
