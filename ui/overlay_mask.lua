@@ -1,15 +1,16 @@
 local OverlayMask = {}
 OverlayMask.__index = OverlayMask
 
-function OverlayMask.new(screenFrame)
+function OverlayMask.new(focusFrame, screenFrame)
     local self = setmetatable({}, OverlayMask)
+    focusFrame = focusFrame or hs.screen.mainScreen():fullFrame()
     screenFrame = screenFrame or hs.screen.mainScreen():fullFrame()
 
     self.canvas = hs.canvas.new(screenFrame):appendElements({
         {
             type = "rectangle",
             action = "fill",
-            fillColor = { black = 0, alpha = 0.5 },
+            fillColor = { alpha = 0.5, red = 0, green = 0, blue = 0 },
             frame = {
                 x = 0, y = 0,
                 w = screenFrame.w,
@@ -18,12 +19,14 @@ function OverlayMask.new(screenFrame)
         },
         {
             type = "rectangle",
-            action = "clear",
+            action = "fill",        -- fill, but...
+            compositeRule = "clear",-- ...with clear blend mode
+            fillColor      = { alpha = 0 }, -- color ignored, but explicit
             frame = {
-                x = screenFrame.w / 2 - 100,
-                y = screenFrame.h / 2 - 100,
-                w = 200,
-                h = 200
+                x = focusFrame.x,
+                y = focusFrame.y,
+                w = focusFrame.w,
+                h = focusFrame.h
             }
         }
     })
@@ -34,8 +37,8 @@ function OverlayMask.new(screenFrame)
     return self
 end
 
-function OverlayMask:focusTo(rect)
-    self.canvas[2].frame = rect
+function OverlayMask:focusTo(newFocusFrame)
+    self.canvas[2].frame = newFocusFrame
 end
 
 function OverlayMask:updateFrame(rect)

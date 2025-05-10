@@ -3,7 +3,7 @@ local vim_mode = require("vim.vim_core")
 local Tween = require("animation.tween")
 --
 local Crosshair = require("input_utils.cursor_navigator.crosshair")
-local NaviAssist = require("input_utils.cursor_navigator.navi_assist_canvas")
+local NaviCanvas = require("input_utils.cursor_navigator.navi_assist_canvas")
 --
 local cursor_navigator = {}
 local modal = hs.hotkey.modal.new({"alt"}, "c")
@@ -16,10 +16,7 @@ local directionKeys = {"u","i","o",
                        "j",    "l",
                        "h","k",";"}
 local goLastPointKeys = {"."}
--- canvas
-local bgCanvas = nil
-local gridCanvas = nil
-local anchorCanvas = nil
+-- screen & canvas
 local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
 -- vector2 pointer
@@ -27,9 +24,10 @@ local currentPointer = {x = 0, y = 0}
 local lastClickedPointer = {x = 0, y = 0}
 -- UI
 local crosshair = Crosshair:new()
-
+local naviCanvas = NaviCanvas:new()
 
 local function drawBgPanel(rect)
+    local bgCanvas
     if bgCanvas then
         bgCanvas:delete()
     end
@@ -49,29 +47,6 @@ local function drawBgPanel(rect)
     })
 end
 
-local function drawGrid(rect)
-    if gridCanvas then
-        gridCanvas:delete()
-    end
-
-    gridCanvas = hs.canvas.new{
-        x = rect.x,
-        y = rect.y,
-        w = rect.w,
-        h = rect.h,
-    }:show()
-
-    gridCanvas:appendElements({
-        type = "rectangle",
-        action = "fill",
-        fillColor = { alpha = 0.5, red = 0, green = 0, blue = 0 },
-        strokeColor = { alpha = 0.5, red = 1, green = 1, blue = 1 },
-        strokeWidth = 0.5,
-    })
-
-    local cellWidth, cellHeight = rect.w / 3, rect.h / 3
-end
-
 local function refineGrid(key)
     local index = hs.fnutils.indexOf(directionKeys, key)
     if not index then
@@ -89,10 +64,10 @@ local function refineGrid(key)
         h = cellHeight,
     }
     currentDepth = currentDepth + 1
-    drawGrid(currentRect)
 end
 
 local function drawAnchor(rect)
+    local anchorCanvas
     if anchorCanvas then
         anchorCanvas:delete()
     end
@@ -176,9 +151,7 @@ local function init_navigator()
         y = screenFrame.h / 2,
     }
     currentRect = screenFrame
-    -- drawBgPanel(currentRect)
-    -- drawGrid(currentRect)
-    -- drawAnchor(currentRect)
+    naviCanvas:drawMask()
     crosshair:show(currentRect)
 end
 
@@ -190,17 +163,17 @@ function modal:entered()
     master_eventtap.register(navigatorHandler)
 end
 
--- Test: Move crosshair downward when "k" is pressed in modal
 modal:bind({}, "k", function()
     local targetPointer = {
         x = currentPointer.x + 100,
         y = currentPointer.y + 100
     }
-    Tween.move(currentPointer, targetPointer, 0.2, function(pos)
+    local startPointer = currentPointer
+    Tween.move(startPointer, targetPointer, 0.2, function(pos)
         crosshair:moveTo(pos.x, pos.y)
     end)
     currentPointer = targetPointer
-
+    naviCanvas:refineMask({x=0,y=0,w=400,h=300})
 end)
 
 function modal:exited()
