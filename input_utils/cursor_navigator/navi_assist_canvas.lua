@@ -38,12 +38,12 @@ end
 -- buildGridElements : returns segments & border elements
 --------------------------------------------------------------------
 local function buildGridElements(frame, rows, cols, innerWidth)
-    rows       = rows or 4
-    cols       = cols or 4
-    innerWidth = innerWidth or 1
-    local lineColor   = Style.grid.strokeColor
-    local borderColor = Style.grid.strokeColor
-    local borderW     = innerWidth
+    rows = rows or 4
+    cols = cols or 4
+    innerWidth = innerWidth or Style.grid.lineWidth
+    local innerLineColor = Style.grid.innerLineColor
+    local outLineColor   = Style.grid.outLineColor
+    local outLineWidth   = Style.grid.lineWidth
 
     local elements = {}
     local cellW, cellH = frame.w / cols, frame.h / rows
@@ -52,9 +52,10 @@ local function buildGridElements(frame, rows, cols, innerWidth)
     for c = 1, cols-1 do
         local x = c * cellW
         table.insert(elements, {
-            type="segments", action="stroke",
+            type = "segments",
+            action = "stroke",
             strokeWidth = innerWidth,
-            strokeColor = lineColor,
+            strokeColor = innerLineColor,
             coordinates = { {x=x, y=0}, {x=x, y=frame.h} },
         })
     end
@@ -62,52 +63,55 @@ local function buildGridElements(frame, rows, cols, innerWidth)
     for r = 1, rows-1 do
         local y = r * cellH
         table.insert(elements, {
-            type="segments", action="stroke",
+            type = "segments",
+            action = "stroke",
             strokeWidth = innerWidth,
-            strokeColor = lineColor,
+            strokeColor = innerLineColor,
             coordinates = { {x=0, y=y}, {x=frame.w, y=y} },
         })
     end
-    -- border
+    -- focus area outline
     table.insert(elements, {
-        type="rectangle", action="stroke",
-        strokeWidth = borderW,
-        strokeColor = borderColor,
+        type = "rectangle",
+        action = "stroke",
+        strokeWidth = outLineWidth,
+        strokeColor = outLineColor,
         frame = {x=0, y=0, w=frame.w, h=frame.h},
     })
     return elements
 end
 
-local function drawAnchors(gridPoints)
+local function drawAnchors(gridPoints,frame)
     local anchorItems = {}
-    for _, anchor in ipairs(anchorsMap) do
-        local point = gridPoints[anchor.r][anchor.c]
-        local label = anchor.key
-        --
-        local underlaySize = Style.anchor.fontSize + Style.anchor.padding * 2
-        local underlayRect = hs.geometry.rect(
-            point.x - underlaySize/2,
-            point.y - underlaySize/2,
-            underlaySize,
-            underlaySize
-        )
-        local underlay = hs.drawing.rectangle(underlayRect)
-        underlay:setFillColor(Style.anchor.underlayColor)
-                :setStroke(false)
-                :setRoundedRectRadii(Style.anchor.radius, Style.anchor.radius)
-                -- :bringToFront(true)
-                :show()
-        --
-        local text = hs.drawing.text(underlayRect, label)
-        text:setTextFont(Style.anchor.fontName)
-            :setTextSize(Style.anchor.fontSize)
-            :setTextColor(Style.anchor.normalColor)
-            :setTextAlignment("center")
-            -- :bringToFront(true)
-            :show()
-        --
-        table.insert(anchorItems, underlay)
-        table.insert(anchorItems, text)
+    local bgColor   = Style.anchor.underlayColor
+    local textColor = Style.anchor.normalColor
+    local fontName  = Style.anchor.fontName
+    local fontSize  = Style.anchor.fontSize
+    local radius    = Style.anchor.radius
+    local padding   = Style.anchor.padding
+    local bgSize   = fontSize + padding * 2
+
+    for _,anchor in ipairs(anchorsMap) do
+        local point   = gridPoints[anchor.r][anchor.c]
+        local rect = {x = point.x - bgSize/2 - frame.x,
+                      y = point.y - bgSize/2 - frame.y + 2,
+                      w = bgSize, h = bgSize}
+        table.insert(anchorItems, {
+            type = "rectangle",
+            action = "fill",
+            fillColor = bgColor,
+            roundedRectRadii = {xRadius=radius, yRadius=radius},
+            frame = rect,
+        })
+        table.insert(anchorItems, {
+            type = "text",
+            text = anchor.key,
+            textFont = fontName,
+            textSize = fontSize,
+            textColor = textColor,
+            textAlignment = "center",
+            frame = rect,
+        })
     end
     return anchorItems
 end
@@ -124,42 +128,10 @@ function NaviCanvas:drawAssistCanvas(frame, rows, cols, innerWidth)
     --
     local gridEls = buildGridElements({x=0,y=0,w=frame.w,h=frame.h}, rows, cols, innerWidth)
     self.grid:appendElements(gridEls)
-
-    -- 2. generate anchors & append
+    --
     local gridPoints = generateGridPoints(frame)
-
-    local anchorEls = {}
-    local bgColor   = Style.anchor.underlayColor
-    local textColor = Style.anchor.normalColor
-    local fontName  = Style.anchor.fontName
-    local fontSize  = Style.anchor.fontSize
-    local radius    = Style.anchor.radius
-    local pad       = Style.anchor.padding
-    local boxSize   = fontSize + pad*2
-
-    for _,a in ipairs(anchorsMap) do
-        local pt   = gridPoints[a.r][a.c]
-        local rect = {x = pt.x - boxSize/2 - frame.x,  -- local coords
-                      y = pt.y - boxSize/2 - frame.y,
-                      w = boxSize, h = boxSize}
-
-        table.insert(anchorEls, {
-            type="rectangle", action="fill",
-            fillColor = bgColor,
-            roundedRectRadii = {xRadius=radius, yRadius=radius},
-            frame = rect,
-        })
-        table.insert(anchorEls, {
-            type="text",
-            text=a.key,
-            textFont = fontName,
-            textSize = fontSize,
-            textColor = textColor,
-            textAlignment="center",
-            frame = rect,
-        })
-    end
-    self.grid:appendElements(anchorEls)
+    local anchorItems = drawAnchors(gridPoints, frame)
+    self.grid:appendElements(anchorItems)
 end
 
 function NaviCanvas:drawMask()

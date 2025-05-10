@@ -156,9 +156,9 @@ local function init_navigator()
         y = screenFrame.h / 2,
     }
     currentRect = screenFrame
+    crosshair:show(currentRect)
     naviCanvas:drawMask()
     naviCanvas:drawAssistCanvas()
-    crosshair:show(currentRect)
 end
 
 function modal:entered()
