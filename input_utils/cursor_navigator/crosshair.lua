@@ -1,4 +1,4 @@
-local Style = require("input_utils.cursor_navigator.crosshair_style")
+local Style = require("input_utils.cursor_navigator.cursor_navi_styles")
 --
 local Crosshair = {}
 Crosshair.__index = Crosshair
@@ -52,10 +52,10 @@ function Crosshair:show(rect)
         local w, h = rect.w, rect.h
 
         -- 顺序：center 后绘制，expand 最后绘制，覆盖其上
-        for _, elem in ipairs(Style.center(self.cx, self.cy)) do
+        for _, elem in ipairs(Style.crosshairCenter(self.cx, self.cy)) do
             self.canvas[#self.canvas + 1] = elem
         end
-        for _, elem in ipairs(Style.expand(self.cx, self.cy, w, h)) do
+        for _, elem in ipairs(Style.crosshairExpand(self.cx, self.cy, w, h)) do
             self.canvas[#self.canvas + 1] = elem
         end
 

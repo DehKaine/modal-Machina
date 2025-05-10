@@ -1,4 +1,4 @@
-local Style = require("input_utils.cursor_navigator.canvas_style")
+local Style = require("input_utils.cursor_navigator.cursor_navi_styles")
 local Mask = require("ui.overlay_mask")
 --
 local NaviCanvas = {}
