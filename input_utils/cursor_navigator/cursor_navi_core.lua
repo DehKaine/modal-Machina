@@ -10,12 +10,11 @@ local modal = hs.hotkey.modal.new({"alt"}, "c")
 
 -- depth
 local currentDepth = 0
-local maxDepth = 3
+local maxDepth = 4
 -- keys
 local directionKeys = {"u","i","o",
                        "j",    "l",
                        "h","k",";"}
-local goLastPointKeys = {"."}
 local keyToAnchorMap = {
     u = {r = 2, c = 2}, i = {r = 2, c = 3}, o = {r = 2, c = 4},
     j = {r = 3, c = 2},                     l = {r = 3, c = 4},
@@ -30,78 +29,6 @@ local lastClickedPointer = {x = 0, y = 0}
 -- UI
 local crosshair = Crosshair:new()
 local naviCanvas = NaviCanvas:new()
-
-local function drawBgPanel(rect)
-    local bgCanvas
-    if bgCanvas then
-        bgCanvas:delete()
-    end
-
-    bgCanvas = hs.canvas.new{
-        x = rect.x,
-        y = rect.y,
-        w = rect.w,
-        h = rect.h,
-    }:show()
-
-    bgCanvas:appendElements({
-        type = "rectangle",
-        action = "stroke",
-        strokeColor = { alpha = 0.3, red = 0, green = 0, blue = 1 },
-        strokeWidth = 0.5,
-    })
-end
-
-local function refineGrid(key)
-    local index = hs.fnutils.indexOf(directionKeys, key)
-    if not index then
-        return
-    end
-
-    local row = math.floor((index - 1) / 3)
-    local col = (index - 1) % 3
-
-    local cellWidth, cellHeight = currentRect.w / 3, currentRect.h / 3
-    currentRect = {
-        x = currentRect.x + col * cellWidth,
-        y = currentRect.y + row * cellHeight,
-        w = cellWidth,
-        h = cellHeight,
-    }
-    currentDepth = currentDepth + 1
-end
-
-local function drawAnchor(rect)
-    local anchorCanvas
-    if anchorCanvas then
-        anchorCanvas:delete()
-    end
-    local font = {}
-    anchorCanvas = hs.canvas.new{
-        x = currentRect.x,
-        y = currentRect.y,
-        w = currentRect.w,
-        h = currentRect.h,
-    }:show()
-
-    anchorCanvas:appendElements({
-        type = "text",
-        text = "",
-        textFont = font.name,
-        textSize = font.size,
-        textColor = font.normalColor,
-        frame = {
-            x = rect.x + rect.w / 2 - 6,
-            y = rect.y + rect.h / 2 - 12,
-            w = 20,
-            h = 24,
-        },
-        action = "fill",
-        fillColor = font.underlayColor,
-        strokeColor = font.underlayColor,
-        strokeWidth = 0.5,
-    })
-end
 
 local function clickPointer(currentPointer)
     local point = currentPointer
@@ -121,32 +48,43 @@ local function clickPointer(currentPointer)
     )
 
     clickDown:post()
-    hs.timer.usleep(20000) -- 20ms delay
+    hs.timer.usleep(20000)
     clickUp:post()
     lastClickedPointer = point
 end
 
-local function navigatorHandler(event)
-    -- local key = event:getCharacters(true)
-    -- if hs.fnutils.contains(directionKeys, key) then
-    --     refineGrid(key)
-    --     if currentDepth >= 3 then
-    --         clickPointer()
-    --         cursor_navigator.stop()
-    --     end
-    --     return true
-    -- elseif key == " " then
-    --     if currentDepth == 0 then
-    --         clickPointer()
-    --         cursor_navigator.stop()
-    --     else
-    --         clickPointer()
-    --         cursor_navigator.stop()
-    --     end
-    --     return true
-    -- end
-    -- return false
+local function handleAnchorKey(key)
+    local anchorIndex = keyToAnchorMap[key] 
+    if not anchorIndex then return end
+    --
+    local gridPoints = naviCanvas:generateGridPoints(currentRect)
+    local targetPointer = gridPoints[anchorIndex.r][anchorIndex.c]
+    --
+    local startPointer = currentPointer
+    hs.mouse.absolutePosition(targetPointer)
+    Tween.move(startPointer, targetPointer, 0.2, function (pos) 
+        crosshair:moveTo(pos.x, pos.y)
+    end)
+    local newFocusArea = naviCanvas:getNewFocusArea(currentRect, targetPointer)
+    naviCanvas:refineMask(newFocusArea)
+    naviCanvas:drawAssistCanvas(newFocusArea)
+    currentPointer = targetPointer
+    currentRect = newFocusArea
+    currentDepth = currentDepth + 1
+    if currentDepth >= maxDepth then
+        clickPointer(currentPointer)
+        modal:exit()
+    end
 end
+
+local function navigatorHandler(event)
+    local key = event:getCharacters(true)
+    if hs.fnutils.contains(directionKeys, key) then
+        handleAnchorKey(key)
+        return true
+    end
+    return false
+    end
 
 local function init_navigator()
     currentDepth = 0
@@ -169,18 +107,9 @@ function modal:entered()
     master_eventtap.register(navigatorHandler)
 end
 
-modal:bind({}, "k", function()
-    local targetPointer = {
-        x = currentPointer.x + 100,
-        y = currentPointer.y + 100
-    }
-    local startPointer = currentPointer
-    Tween.move(startPointer, targetPointer, 0.2, function(pos)
-        crosshair:moveTo(pos.x, pos.y)
-    end)
-    currentPointer = targetPointer
-    naviCanvas:refineMask({x=0,y=0,w=400,h=300})
-    naviCanvas:drawAssistCanvas({x=0,y=0,w=400,h=300})
+modal:bind({}, ".", function()
+    clickPointer(lastClickedPointer)
+    modal:exit()
 end)
 
 function modal:exited()

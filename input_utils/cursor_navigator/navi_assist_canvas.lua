@@ -18,7 +18,7 @@ local anchorsMap = {
     {r = 4, c = 2, key = "h"}, {r = 4, c = 3, key = "k"}, {r = 4, c = 4, key = "_"},
 }
 
-local function generateGridPoints(focusArea)
+function NaviCanvas:generateGridPoints(focusArea)
     local points = {}
     local stepX = focusArea.w / 4
     local stepY = focusArea.h / 4
@@ -34,10 +34,21 @@ local function generateGridPoints(focusArea)
     return points
 end
 
---------------------------------------------------------------------
--- buildGridElements : returns segments & border elements
---------------------------------------------------------------------
-local function buildGridElements(frame, rows, cols, innerWidth)
+function NaviCanvas:getNewFocusArea(oldFrame, centerPoint)
+    local newFocusArea = {}
+    --
+    local newW = oldFrame.w / 2
+    local newH = oldFrame.h / 2
+    local newX = centerPoint.x - newW / 2
+    local newY = centerPoint.y - newH / 2
+    --
+    local newFocusArea = {
+        x = newX, y = newY, w = newW, h = newH
+    }
+    return newFocusArea
+end
+
+local function drawGrid(frame, rows, cols, innerWidth)
     rows = rows or 4
     cols = cols or 4
     innerWidth = innerWidth or Style.grid.lineWidth
@@ -116,7 +127,6 @@ local function drawAnchors(gridPoints,frame)
     return anchorItems
 end
 
-
 function NaviCanvas:drawAssistCanvas(frame, rows, cols, innerWidth)
     frame = frame or hs.screen.mainScreen():fullFrame()
     rows = rows or 4
@@ -126,10 +136,10 @@ function NaviCanvas:drawAssistCanvas(frame, rows, cols, innerWidth)
     if self.grid then self.grid:delete() end
     self.grid = hs.canvas.new(frame):show()
     --
-    local gridEls = buildGridElements({x=0,y=0,w=frame.w,h=frame.h}, rows, cols, innerWidth)
-    self.grid:appendElements(gridEls)
+    local gridCells = drawGrid({x=0,y=0,w=frame.w,h=frame.h}, rows, cols, innerWidth)
+    self.grid:appendElements(gridCells)
     --
-    local gridPoints = generateGridPoints(frame)
+    local gridPoints = NaviCanvas:generateGridPoints(frame)
     local anchorItems = drawAnchors(gridPoints, frame)
     self.grid:appendElements(anchorItems)
 end
