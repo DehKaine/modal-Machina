@@ -1,8 +1,11 @@
 local style = {}
 
-style.grid = {}
-
-style.focusMask = {}
+style.grid = {
+    type = "rectangle",
+    action = "stroke",
+    strokeColor = { red = 0.3, green = 0.7, blue = 1.0, alpha = 1 },
+    strokeWidth = 1,
+}
 
 style.anchorItem = {}
 

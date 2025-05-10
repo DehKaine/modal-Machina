@@ -152,6 +152,7 @@ local function init_navigator()
     }
     currentRect = screenFrame
     naviCanvas:drawMask()
+    naviCanvas:drawGrid()
     crosshair:show(currentRect)
 end
 
@@ -174,10 +175,12 @@ modal:bind({}, "k", function()
     end)
     currentPointer = targetPointer
     naviCanvas:refineMask({x=0,y=0,w=400,h=300})
+    naviCanvas:drawGrid({x=0,y=0,w=400,h=300})
 end)
 
 function modal:exited()
     crosshair:destroy()
+    naviCanvas:destroy()
     master_eventtap.unregister(navigatorHandler)
 end
 
