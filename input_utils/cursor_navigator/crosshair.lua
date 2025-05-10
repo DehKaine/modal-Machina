@@ -1,4 +1,3 @@
-local hs_inspect = require("hs.inspect")
 local Style = require("input_utils.cursor_navigator.crosshair_style")
 --
 local Crosshair = {}
@@ -16,7 +15,7 @@ end
 -- 更新所有坐标，使十字始终以 (x,y) 为中心
 function Crosshair:moveTo(x, y)
     self.cx, self.cy = x, y
-    if not self.built then return end   -- no elements yet
+    if not self.built then return end
 
     local w, h  = self.frame.w, self.frame.h
     local size  = 10   -- 与 Style.center 保持一致

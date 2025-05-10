@@ -3,6 +3,7 @@ local vim_mode = require("vim.vim_core")
 local Tween = require("animation.tween")
 --
 local Crosshair = require("input_utils.cursor_navigator.crosshair")
+local NaviAssist = require("input_utils.cursor_navigator.navi_assist_canvas")
 --
 local cursor_navigator = {}
 local modal = hs.hotkey.modal.new({"alt"}, "c")
@@ -26,12 +27,7 @@ local currentPointer = {x = 0, y = 0}
 local lastClickedPointer = {x = 0, y = 0}
 -- UI
 local crosshair = Crosshair:new()
-local font = {
-    name = "Monaco",
-    size = 16,
-    normalColor = { alpha = 0.7, red = 1, green = 1, blue = 1 },
-    underlayColor = { alpha = 0.4, red = 1, green = 1, blue = 0 },
-}
+
 
 local function drawBgPanel(rect)
     if bgCanvas then
@@ -74,40 +70,6 @@ local function drawGrid(rect)
     })
 
     local cellWidth, cellHeight = rect.w / 3, rect.h / 3
-
-    for row = 0, 2 do
-        for col = 0, 2 do
-            local index = row * 3 + col + 1
-            local label = directionKeys[index]
-            gridCanvas:appendElements({
-                {
-                    type = "rectangle",
-                    action = "stroke",
-                    strokeColor = { alpha = 0.3, red = 1, green = 1, blue = 1 },
-                    strokeWidth = 0.5,
-                    frame = {
-                        x = col * cellWidth,
-                        y = row * cellHeight,
-                        w = cellWidth,
-                        h = cellHeight,
-                    },
-                },
-                {
-                    type = "text",
-                    text = label,
-                    textFont = font.name,
-                    textSize = math.max(6, font.size - currentDepth * 2),
-                    textColor = font.color,
-                    frame = {
-                        x = col * cellWidth + cellWidth / 2 - 6,
-                        y = row * cellHeight + cellHeight / 2 - 12,
-                        w = 20,
-                        h = 24,
-                    },
-                }
-            })
-        end
-    end
 end
 
 local function refineGrid(key)
@@ -134,7 +96,7 @@ local function drawAnchor(rect)
     if anchorCanvas then
         anchorCanvas:delete()
     end
-
+    local font = {}
     anchorCanvas = hs.canvas.new{
         x = currentRect.x,
         y = currentRect.y,
@@ -181,6 +143,7 @@ local function clickPointer(currentPointer)
     clickDown:post()
     hs.timer.usleep(20000) -- 20ms delay
     clickUp:post()
+    lastClickedPointer = point
 end
 
 local function navigatorHandler(event)
@@ -247,6 +210,7 @@ end
 
 modal:bind({},"space", function()
     clickPointer(currentPointer)
+    modal:exit()
 end)
 
 modal:bind({},"escape", function()
