@@ -9,10 +9,11 @@ style.grid = {
 }
 
 style.anchor = {
-    normalColor = { alpha = 0.9, red = 0, green = 0, blue = 0 },
-    underlayColor = { alpha = 0.6, red = 1, green = 1, blue = 0 },
+    fontColor = { alpha = 0.9, red = 0, green = 0, blue = 0 },
     fontName = "Monaco",
     fontSize = 16,
+    bgColor = { alpha = 0.6, red = 1, green = 1, blue = 0 },
+    lastPtColor = { alpha = 0.6, red = 1, green = 0.4, blue = 0.2 },
     radius = 2,
     padding = 4
 }

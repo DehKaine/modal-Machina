@@ -92,14 +92,14 @@ local function drawGrid(frame, rows, cols, innerWidth)
     return elements
 end
 
-local function drawAnchors(gridPoints,frame)
+local function drawAnchors(gridPoints,frame,depth)
     local anchorItems = {}
-    local bgColor   = Style.anchor.underlayColor
-    local textColor = Style.anchor.normalColor
+    local bgColor   = Style.anchor.bgColor
+    local textColor = Style.anchor.fontColor
     local fontName  = Style.anchor.fontName
-    local fontSize  = Style.anchor.fontSize
+    local fontSize  = Style.anchor.fontSize - depth * 3
     local radius    = Style.anchor.radius
-    local padding   = Style.anchor.padding
+    local padding   = Style.anchor.padding - depth * 1
     local bgSize   = fontSize + padding * 2
 
     for _,anchor in ipairs(anchorsMap) do
@@ -127,8 +127,9 @@ local function drawAnchors(gridPoints,frame)
     return anchorItems
 end
 
-function NaviCanvas:drawAssistCanvas(frame, rows, cols, innerWidth)
+function NaviCanvas:drawAssistCanvas(frame, depth, rows, cols, innerWidth)
     frame = frame or hs.screen.mainScreen():fullFrame()
+    depth = depth or 0
     rows = rows or 4
     cols = cols or 4
     innerWidth = innerWidth or 1
@@ -140,7 +141,7 @@ function NaviCanvas:drawAssistCanvas(frame, rows, cols, innerWidth)
     self.grid:appendElements(gridCells)
     --
     local gridPoints = NaviCanvas:generateGridPoints(frame)
-    local anchorItems = drawAnchors(gridPoints, frame)
+    local anchorItems = drawAnchors(gridPoints, frame, depth)
     self.grid:appendElements(anchorItems)
 end
 

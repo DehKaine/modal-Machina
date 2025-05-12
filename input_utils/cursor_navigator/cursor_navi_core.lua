@@ -14,11 +14,11 @@ local maxDepth = 4
 -- keys
 local directionKeys = {"u","i","o",
                        "j",    "l",
-                       "h","k",";"}
+                       "h","k","_"}
 local keyToAnchorMap = {
     u = {r = 2, c = 2}, i = {r = 2, c = 3}, o = {r = 2, c = 4},
     j = {r = 3, c = 2},                     l = {r = 3, c = 4},
-    h = {r = 4, c = 2}, k = {r = 4, c = 3}, [";"] = {r = 4, c = 4}
+    h = {r = 4, c = 2}, k = {r = 4, c = 3}, ["_"] = {r = 4, c = 4}
 }
 -- screen & canvas
 local screenFrame = {x = 0, y = 0, w = 0, h = 0}
@@ -35,18 +35,11 @@ local function clickPointer(currentPointer)
     hs.mouse.absolutePosition(point)
 
     local clickDown = hs.eventtap.event.newMouseEvent(
-        hs.eventtap.event.types.leftMouseDown, {
-            x = point.x,
-            y = point.y
-        }
+        hs.eventtap.event.types.leftMouseDown, { x = point.x, y = point.y }
     )
     local clickUp = hs.eventtap.event.newMouseEvent(
-        hs.eventtap.event.types.leftMouseUp, {
-            x = point.x,
-            y = point.y
-        }
+        hs.eventtap.event.types.leftMouseUp, { x = point.x, y = point.y }
     )
-
     clickDown:post()
     hs.timer.usleep(20000)
     clickUp:post()
@@ -65,9 +58,11 @@ local function handleAnchorKey(key)
     Tween.move(startPointer, targetPointer, 0.2, function (pos) 
         crosshair:moveTo(pos.x, pos.y)
     end)
+    --
     local newFocusArea = naviCanvas:getNewFocusArea(currentRect, targetPointer)
     naviCanvas:refineMask(newFocusArea)
-    naviCanvas:drawAssistCanvas(newFocusArea)
+    naviCanvas:drawAssistCanvas(newFocusArea,currentDepth)
+    --
     currentPointer = targetPointer
     currentRect = newFocusArea
     currentDepth = currentDepth + 1
