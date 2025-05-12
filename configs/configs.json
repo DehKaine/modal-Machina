@@ -1,0 +1,20 @@
+{
+    "single_keys" : {
+
+    },
+    "multi_keys" : {
+
+    },
+    "win_flow" : {
+
+    },
+    "media_controller" : {
+
+    },
+    "memocho" : {
+        "keymap_image" : {
+            "cmd" : "kmi" ,
+            "path" : "/Users/kouteki/Pictures/80_hs_memocho/image.jpg"
+        }
+    }
+}
