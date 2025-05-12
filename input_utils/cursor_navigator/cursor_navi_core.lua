@@ -32,9 +32,10 @@ local screenFrame = {x = 0, y = 0, w = 0, h = 0}
 local currentRect = {x = 0, y = 0, w = 0, h = 0}
 -- vector2 pointer
 local currentPointer     = {x = 0, y = 0}
-local lastClickedPointer = {x = 0, y = 0}
+local lastClickedPointer = nil
 -- UI
 local crosshair  = Crosshair:new()
+local lastClickedCrosshair = Crosshair:new()
 local naviCanvas = NaviCanvas:new()
 
 local function clickPointer(currentPointer)
@@ -132,7 +133,15 @@ local function init_navigator()
     }
     currentRect = screenFrame
     crosshair:show(currentRect)
+    -- if lastClickedPointer.x ~= 0 and lastClickedPointer.y ~= 0 then
+    if lastClickedPointer then
+        if  lastClickedPointer.x ~= currentRect.w/2 or 
+            lastClickedPointer.y ~= currentRect.h/2 then
+            lastClickedCrosshair:setLastClickePointer(currentRect, lastClickedPointer)
+        end
+    end
     naviCanvas:drawMask(nil,screenFrame)
+    naviCanvas:refineMask(screenFrame)
     naviCanvas:drawAssistCanvas()
 end
 
@@ -151,6 +160,7 @@ end)
 
 function modal:exited()
     crosshair:destroy()
+    lastClickedCrosshair:destroy()
     naviCanvas:destroy()
     master_eventtap.unregister(navigatorHandler)
 end

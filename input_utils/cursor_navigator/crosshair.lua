@@ -16,17 +16,15 @@ end
 function Crosshair:moveTo(x, y)
     self.cx, self.cy = x, y
     if not self.built then return end
-
+    --
     local offsetX, offsetY = self.frame.x, self.frame.y
     local localX,  localY  = x - offsetX, y - offsetY
     local w, h  = self.frame.w, self.frame.h
     local size  = 10
-
-    -- center 十字短线
+    -- center
     self.canvas[1].coordinates = { {x = localX - size, y = localY}, {x = localX + size, y = localY} }
     self.canvas[2].coordinates = { {x = localX, y = localY - size}, {x = localX, y = localY + size} }
-
-    -- expand 横、竖线
+    -- expand
     self.canvas[3].coordinates = { {x = 0, y = localY}, {x = w, y = localY} }
     self.canvas[4].coordinates = { {x = localX, y = 0}, {x = localX, y = h} }
 end
@@ -37,11 +35,8 @@ end
 
 function Crosshair:show(rect)
     if not rect or not rect.w or not rect.h then return end
-    -- 若没有 canvas，则创建
     if not self.canvas then
-        self.canvas = hs.canvas.new{
-            x = rect.x, y = rect.y, w = rect.w, h = rect.h
-        }
+        self.canvas = hs.canvas.new{ x = rect.x, y = rect.y, w = rect.w, h = rect.h }
     else
         self.canvas:frame(rect)
     end
@@ -53,19 +48,39 @@ function Crosshair:show(rect)
     
     if not self.built then
         local w, h = rect.w, rect.h
-
-        -- 顺序：center 后绘制，expand 最后绘制，覆盖其上
+        --
         for _, elem in ipairs(Style.crosshairCenter(self.cx, self.cy)) do
             self.canvas[#self.canvas + 1] = elem
         end
+        --
         for _, elem in ipairs(Style.crosshairExpand(self.cx, self.cy, w, h)) do
             self.canvas[#self.canvas + 1] = elem
         end
-
+        --
         self.built = true
     end
 
     self:moveTo(self.cx, self.cy)
+    self.canvas:show()
+end
+
+function Crosshair:setLastClickePointer(rect, lastClickedPossition)
+    if not self.canvas then
+        self.canvas = hs.canvas.new{ x = rect.x, y = rect.y, w = rect.w, h = rect.h }
+    else
+        self.canvas:frame(rect)
+    end
+    --
+    self.cx = lastClickedPossition.x
+    self.cy = lastClickedPossition.y
+    self.built = false
+    --
+    if not self.built then
+        for _, elem in ipairs(Style.crosshairLastClicked(self.cx, self.cy)) do
+            self.canvas[#self.canvas + 1] = elem
+        end
+        self.built = true
+    end
     self.canvas:show()
 end
 

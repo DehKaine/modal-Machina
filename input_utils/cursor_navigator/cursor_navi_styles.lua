@@ -69,4 +69,30 @@ style.crosshairExpand = function(x, y, w, h)
     }
 end
 
+style.crosshairLastClicked = function(x, y)
+    local size = 10
+    return {
+        {
+            type = "segments",
+            action = "stroke",
+            strokeColor = { red = 1, green = 0.3, blue = 0.1, alpha = 0.8 },
+            strokeWidth = 3,
+            coordinates = {
+                { x = x - size, y = y },
+                { x = x + size, y = y }
+            }
+        },
+        {
+            type = "segments",
+            action = "stroke",
+            strokeColor = { red = 1, green = 0.3, blue = 0.1, alpha = 0.8 },
+            strokeWidth = 3,
+            coordinates = {
+                { x = x, y = y - size },
+                { x = x, y = y + size }
+            }
+        }
+    }
+end
+
 return style
