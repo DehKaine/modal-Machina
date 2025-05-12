@@ -90,7 +90,7 @@ local function init_navigator()
     }
     currentRect = screenFrame
     crosshair:show(currentRect)
-    naviCanvas:drawMask()
+    naviCanvas:drawMask(nil,screenFrame)
     naviCanvas:drawAssistCanvas()
 end
 

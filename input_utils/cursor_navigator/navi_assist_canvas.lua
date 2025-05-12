@@ -145,15 +145,24 @@ function NaviCanvas:drawAssistCanvas(frame, depth, rows, cols, innerWidth)
     self.grid:appendElements(anchorItems)
 end
 
-function NaviCanvas:drawMask()
+function NaviCanvas:drawMask(focusArea, screenFrame)
+    screenFrame = screenFrame or hs.screen.mainScreen():fullFrame()
+    focusArea = focusArea or screenFrame
     if self.mask then self.mask:destroy() end
-    self.mask = Mask:new()
+    self.mask = Mask:new(focusArea, screenFrame)
     self.mask:show()
 end
 
 function NaviCanvas:refineMask(focusArea)
     if self.mask then
-        self.mask:focusTo(focusArea)
+        local screenFrame = self.mask.canvas:frame()
+        local justifiedFocusArea = {
+            x = focusArea.x - screenFrame.x,
+            y = focusArea.y - screenFrame.y,
+            w = focusArea.w,
+            h = focusArea.h
+        }
+        self.mask:focusTo(justifiedFocusArea)
     end
 end
 
