@@ -17,16 +17,18 @@ function Crosshair:moveTo(x, y)
     self.cx, self.cy = x, y
     if not self.built then return end
 
+    local offsetX, offsetY = self.frame.x, self.frame.y
+    local localX,  localY  = x - offsetX, y - offsetY
     local w, h  = self.frame.w, self.frame.h
-    local size  = 10   -- 与 Style.center 保持一致
+    local size  = 10
 
     -- center 十字短线
-    self.canvas[1].coordinates = { {x = x - size, y = y}, {x = x + size, y = y} }
-    self.canvas[2].coordinates = { {x = x, y = y - size}, {x = x, y = y + size} }
+    self.canvas[1].coordinates = { {x = localX - size, y = localY}, {x = localX + size, y = localY} }
+    self.canvas[2].coordinates = { {x = localX, y = localY - size}, {x = localX, y = localY + size} }
 
     -- expand 横、竖线
-    self.canvas[3].coordinates = { {x = 0, y = y}, {x = w, y = y} }
-    self.canvas[4].coordinates = { {x = x, y = 0}, {x = x, y = h} }
+    self.canvas[3].coordinates = { {x = 0, y = localY}, {x = w, y = localY} }
+    self.canvas[4].coordinates = { {x = localX, y = 0}, {x = localX, y = h} }
 end
 
 function Crosshair:hide()
@@ -45,7 +47,8 @@ function Crosshair:show(rect)
     end
     
     self.frame = rect
-    self.cx, self.cy = rect.w / 2, rect.h / 2
+    self.cx = rect.x + rect.w / 2
+    self.cy = rect.y + rect.h / 2
     self.built = false
     
     if not self.built then
@@ -62,6 +65,7 @@ function Crosshair:show(rect)
         self.built = true
     end
 
+    self:moveTo(self.cx, self.cy)
     self.canvas:show()
 end
 

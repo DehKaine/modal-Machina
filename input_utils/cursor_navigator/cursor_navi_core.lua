@@ -85,8 +85,8 @@ local function init_navigator()
     currentDepth = 0
     screenFrame = hs.screen.mainScreen():fullFrame()
     currentPointer = {
-        x = screenFrame.w / 2,
-        y = screenFrame.h / 2,
+        x = screenFrame.x + screenFrame.w / 2,
+        y = screenFrame.y + screenFrame.h / 2,
     }
     currentRect = screenFrame
     crosshair:show(currentRect)

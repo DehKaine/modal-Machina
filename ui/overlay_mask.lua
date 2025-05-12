@@ -1,7 +1,7 @@
 local OverlayMask = {}
 OverlayMask.__index = OverlayMask
 
-function OverlayMask.new(focusFrame, screenFrame)
+function OverlayMask:new(focusFrame, screenFrame)
     local self = setmetatable({}, OverlayMask)
     focusFrame = focusFrame or hs.screen.mainScreen():fullFrame()
     screenFrame = screenFrame or hs.screen.mainScreen():fullFrame()
