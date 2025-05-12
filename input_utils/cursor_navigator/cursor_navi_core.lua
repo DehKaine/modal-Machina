@@ -46,6 +46,17 @@ local function clickPointer(currentPointer)
     lastClickedPointer = point
 end
 
+local function nudgeNaviCanvas()
+    local vec2 = { x = 2, y = 2}
+    local targetPoint = { x = currentPointer.x + vec2.x, y = currentPointer.y + vec2.y}
+    currentRect.x = currentRect.x + vec2.x
+    currentRect.y = currentRect.y + vec2.y
+    crosshair:moveTo(targetPoint.x, targetPoint.y)
+    naviCanvas:refineMask(currentRect)
+    naviCanvas:drawAssistCanvas(currentRect, currentDepth-1)
+    currentPointer = targetPoint
+end
+
 local function handleAnchorKey(key)
     local anchorIndex = keyToAnchorMap[key] 
     if not anchorIndex then return end
@@ -105,6 +116,10 @@ end
 modal:bind({}, ".", function()
     clickPointer(lastClickedPointer)
     modal:exit()
+end)
+
+modal:bind({}, "right", function()
+    nudgeNaviCanvas()
 end)
 
 function modal:exited()
