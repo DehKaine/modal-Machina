@@ -10,6 +10,40 @@ local single_exec_commands = vim_cmds.single_exec_cmds
 
 local modal = hs.hotkey.modal.new({"alt"}, "space")
 
+local escThreshold = 0.5
+local escDownTime = 0
+local escPressedTimer = nil
+
+local longPressTrigger = hs.hotkey.bind({}, ";",
+    function ()
+        escPressedTimer = nil
+        escDownTime = hs.timer.secondsSinceEpoch()
+        hs.timer.doAfter(escThreshold,function()
+            if not escPressedTimer then
+                escPressedTimer = hs.timer.secondsSinceEpoch() - escDownTime
+                if escPressedTimer >= escThreshold then
+                    modal:enter()
+                end
+            end
+        end)
+    end,
+    function ()
+        escPressedTimer = hs.timer.secondsSinceEpoch() - escDownTime
+        if escPressedTimer < escThreshold then
+            hs.pasteboard.setContents("_")
+            hs.eventtap.keyStroke({"cmd"},"v",0)
+            escPressedTimer = 0
+            escDownTime = 0
+            return
+        elseif escPressedTimer > escThreshold then
+            escPressedTimer = 0
+            escDownTime = 0
+            modal:exit()
+        end
+    end
+)
+
+--
 local cmdBuffer = ""
 local prefixNumber = ""
 local lastCommand = nil
@@ -78,12 +112,10 @@ local function vim_handler(event)
         status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
         return true
     end
-
     -- 只拦截英文字母；其余字符放行
     if not char:match("%a") then
         return false
     end
-
     -- 剔除未匹配的字符
     local newBuffer = cmdBuffer .. char
     local matched = false
@@ -98,9 +130,8 @@ local function vim_handler(event)
         cmdBuffer = newBuffer
         status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
     else
-        -- 不处理
+        --
     end
-
     -- 处理指令
     for pattern, action in pairs(command_map) do
         if cmdBuffer == pattern then
@@ -120,24 +151,23 @@ local function vim_handler(event)
         end
     end
 
-    -- 缓冲过长保护
     if #cmdBuffer > 6 then
         cmdBuffer = ""
     end
 
-    return true  -- 我们拦截了这个按键
+    return true
 end
 
 function modal:entered()
     cmdBuffer = ""
     prefixNumber = ""
     status.show("Vim Mode: ON")
-    master_eventtap.register(vim_handler) -- 注册到 master_eventtap
+    master_eventtap.register(vim_handler)
 end
 
 function modal:exited()
     status.hide()
-    master_eventtap.unregister(vim_handler) -- 退出时注销
+    master_eventtap.unregister(vim_handler)
     if exitTimer then
         exitTimer:stop()
         exitTimer = nil

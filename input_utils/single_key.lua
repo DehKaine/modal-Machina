@@ -6,7 +6,6 @@ local master_eventtap = require("master_eventtap")
 
 -- 无修饰键映射
 local noModMap = {
-    [";"] = "_",
     ["'"] = "=",
 }
 
@@ -18,10 +17,10 @@ local shiftModMap = {
 -- alt组合键映射
 local altModMap = {
     ["-"] = {mods = {"shift"}, key = "2"},
-    ["s"] = ";",
-    ["'"] = "'",
+    ["'"] = ";",
     ["/"] = "!",
-    ["["] = "`",
+    ["["] = "'",
+    ["]"] = "`",
     ["\\"] = "~",
 }
 
