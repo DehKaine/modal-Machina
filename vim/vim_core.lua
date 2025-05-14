@@ -10,34 +10,34 @@ local single_exec_commands = vim_cmds.single_exec_cmds
 
 local modal = hs.hotkey.modal.new({"alt"}, "space")
 
-local escThreshold = 0.5
-local escDownTime = 0
-local escPressedTimer = nil
+local longPressThreshold = 0.2
+local longPressStartTime = 0
+local longPressedTime = nil
 
 local longPressTrigger = hs.hotkey.bind({}, ";",
     function ()
-        escPressedTimer = nil
-        escDownTime = hs.timer.secondsSinceEpoch()
-        hs.timer.doAfter(escThreshold,function()
-            if not escPressedTimer then
-                escPressedTimer = hs.timer.secondsSinceEpoch() - escDownTime
-                if escPressedTimer >= escThreshold then
+        longPressedTime = nil
+        longPressStartTime = hs.timer.secondsSinceEpoch()
+        hs.timer.doAfter(longPressThreshold,function()
+            if not longPressedTime then
+                longPressedTime = hs.timer.secondsSinceEpoch() - longPressStartTime
+                if longPressedTime >= longPressThreshold then
                     modal:enter()
                 end
             end
         end)
     end,
     function ()
-        escPressedTimer = hs.timer.secondsSinceEpoch() - escDownTime
-        if escPressedTimer < escThreshold then
+        longPressedTime = hs.timer.secondsSinceEpoch() - longPressStartTime
+        if longPressedTime < longPressThreshold then
             hs.pasteboard.setContents("_")
             hs.eventtap.keyStroke({"cmd"},"v",0)
-            escPressedTimer = 0
-            escDownTime = 0
+            longPressedTime = 0
+            longPressStartTime = 0
             return
-        elseif escPressedTimer > escThreshold then
-            escPressedTimer = 0
-            escDownTime = 0
+        elseif longPressedTime > longPressThreshold then
+            longPressedTime = 0
+            longPressStartTime = 0
             modal:exit()
         end
     end
