@@ -70,6 +70,9 @@ vim_cmds.map = {
     ["fo"] = function()
         win_flow.focusToAppByCmd("fo")
     end,
+    ["fp"] = function()
+        win_flow.focusToAppByCmd("fp")
+    end,
     ["fe"] = function()
         win_flow.focusToAppByCmd("fe")
     end,

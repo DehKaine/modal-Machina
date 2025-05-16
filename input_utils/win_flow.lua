@@ -5,6 +5,7 @@ local focus_map = {
     ft = "Terminal",
     fi = "Finder",
     fo = "Fork",
+    fp = "Adobe Photoshop 2021",
     fe = "Eagle",
     fg = "ChatGPT",
     fc = "Google Chrome",

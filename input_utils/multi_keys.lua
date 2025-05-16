@@ -1,9 +1,5 @@
 
--- 多按键组合逻辑
-
 local master_eventtap = require("master_eventtap")
-
--- ================================================ 映射表定义
 
 local multiKeyMap = {
     ["ctrl-j"] = { key = "left", mods = {} },
@@ -44,8 +40,6 @@ hs.hotkey.bind({"shift"}, "space", function()
     end
 end)
 
--- ================================================ 核心处理函数
-
 local function handleMultiKey(event)
     local mods = event:getFlags()
     local key = hs.keycodes.map[event:getKeyCode()]
@@ -69,7 +63,20 @@ local function handleMultiKey(event)
     return false
 end
 
--- ================================================ 注册到master_eventtap
 master_eventtap.register(handleMultiKey)
+
+local function simulatePsZoom(delta)
+   local event = hs.eventtap.event.newScrollEvent({0, delta}, {}, "line")
+   event:setFlags({alt = true})
+   event:post()
+end
+
+hs.hotkey.bind({"ctrl"}, "pageup", function ()
+    simulatePsZoom(3)
+end)
+
+hs.hotkey.bind({"ctrl"}, "pagedown", function ()
+    simulatePsZoom(-3)
+end)
 
 return {}
