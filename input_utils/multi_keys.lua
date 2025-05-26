@@ -31,15 +31,6 @@ local multiKeyMap = {
     ["alt-p"] = { key = "down", mods = {"alt", "shift"} },
 }
 
-hs.hotkey.bind({"shift"}, "space", function()
-    local current = hs.execute("/opt/homebrew/bin/im-select"):gsub("%s+", "")
-    if current ~= "com.sogou.inputmethod.sogou.pinyin" then
-        hs.execute("/opt/homebrew/bin/im-select com.sogou.inputmethod.sogou.pinyin")
-    else
-        hs.execute("/opt/homebrew/bin/im-select com.apple.keylayout.ABC")
-    end
-end)
-
 local function handleMultiKey(event)
     local mods = event:getFlags()
     local key = hs.keycodes.map[event:getKeyCode()]
@@ -64,6 +55,19 @@ local function handleMultiKey(event)
 end
 
 master_eventtap.register(handleMultiKey)
+
+-- haycl3n's personal keymap
+
+hs.hotkey.bind({"shift"}, "space", function()
+    local current = hs.execute("/opt/homebrew/bin/ims-mac", true):gsub("%s+", "")
+    local targetIM = nil
+    if current ~= "com.sogou.inputmethod.sogou.pinyin" then
+        targetIM = "com.sogou.inputmethod.sogou.pinyin"
+    else
+        targetIM = "com.apple.keylayout.ABC"
+    end
+    hs.execute("ims-mac " .. targetIM, true)
+end)
 
 local function simulatePsZoom(delta)
    local event = hs.eventtap.event.newScrollEvent({0, delta}, {}, "line")
