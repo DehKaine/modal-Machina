@@ -22,11 +22,15 @@ local mediaKeyMap = {
 local bgCanvas = nil
 local eventtap = nil
 
-local font = {
-    name = "Monaco",
-    size = 14,
-    color = { white = 1, alpha = 0.8 },
-}
+local function mergeTables(...)
+    local merged = {}
+    for _, list in ipairs({...}) do
+        for _, el in ipairs(list) do
+            table.insert(merged, el)
+        end
+    end
+    return merged
+end
 
 local function drawPanel()
     if bgCanvas then
@@ -34,26 +38,21 @@ local function drawPanel()
     end
 
     local screenFrame = hs.screen.mainScreen():frame()
-    local width = 720
-    local height = 360
+    local width = 712
+    local height = 180
     local x = screenFrame.x + (screenFrame.w - width) / 2
     local y = screenFrame.y + (screenFrame.h - height) / 2
 
     bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
-    local atlas = hs.image.imageFromPath("~/.HAMMERSPOON/ui/sprite/media_controller/media_controller_atlas.png")
-    bgCanvas:appendElements(Style.bgPanel)
-    -- bgCanvas:appendElements({
-    --     type = "image",
-    --     image = atlas,
-    --     imageFrame = { x = 2, y = 2, w = 1784, h = 124 },
-    --     imageScaling = "scaleNone",
-    --     frame = {x=0,y=0,w=720,h=360}
-    -- })
-        -- bgCanvas:appendElements({
-    --     type = "image",
-    --     image = hs.image.imageFromPath("~/.HAMMERSPOON/ui/sprite/BgPanel.png"),
-    --     frame = {x=0,y=0,w=720,h=360}
-    -- })
+    bgCanvas:appendElements(
+        mergeTables(
+            { Style.bgPanel },
+            Style.Brightness("a", "s"),
+            Style.Sound("d", "f", "g"),
+            Style.MediaControl("h", "j", "k"),
+            Style.Illumination("z", "x")
+        )
+    )
 
     local keys = {}
     for k, _ in pairs(mediaKeyMap) do
@@ -61,43 +60,8 @@ local function drawPanel()
     end
     table.sort(keys)
 
-    local keyCount = #keys
-    local buttonWidth = width / keyCount
-    local buttonHeight = height
 
-    for i, key in ipairs(keys) do
-        local label = key .. "\n" .. (mediaKeyMap[key] or "")
-
-        bgCanvas:appendElements({
-            {
-                type = "rectangle",
-                action = "stroke",
-                strokeColor = { white = 1, alpha = 0.6 },
-                strokeWidth = 1,
-                frame = {
-                    x = (i - 1) * buttonWidth,
-                    y = 0,
-                    w = buttonWidth,
-                    h = buttonHeight,
-                },
-            },
-            {
-                type = "text",
-                text = label,
-                textFont = font.name,
-                textSize = font.size,
-                textColor = font.color,
-                textAlignment = "center",
-                frame = {
-                    x = (i - 1) * buttonWidth,
-                    y = 0,
-                    w = buttonWidth,
-                    h = buttonHeight,
-                },
-            }
-        })
-    end
-end
+ end
 
 local function triggerMedia(key)
     local action = mediaKeyMap[key]

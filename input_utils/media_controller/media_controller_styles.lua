@@ -13,7 +13,7 @@ local function SetLabel(textName, frame)
         type  = "text",
         text  = textName,
         textFont  = "Monaco",
-        textSize  = 14,
+        textSize  = 18,
         textColor = style.color.normalTextColor,
         textAlignment = "center",
         frame = frame or { x = 0, y = 0, w = 100, h = 20 }
@@ -22,8 +22,9 @@ end
 
 style.color = {
     normalTextColor     = Color.SetByHex("b1d1a5"),
-    pressedTextColor    = { white = 1,   alpha = 1   },
+    pressedTextColor    = Color.SetByHex("343434"),
     selectedTextColor   = Color.SetByHex("464646"),
+    headerColor         = Color.SetByHex("343434"),
     normalBgColor       = Color.SetByHex("464646"),
     pressedBgColor      = { white = 0.3, alpha = 0.8 },
     normalElementColor  = { white = 1,   alpha = 0.8 },
@@ -34,7 +35,7 @@ style.bgPanel = {
     type = "image",
     image = setSprite(2, 164, 1784, 424),
     -- imageAlignment = "center",
-    frame = { x = 0, y = 0, w = 720, h = 360 }
+    frame = { x = 0, y = 0, w = 712, h = 180 }
 }
 
 style.processBar = {
@@ -42,19 +43,19 @@ style.processBar = {
 }
 
 style.brightnessDown = {
-    icon = setSprite(2, 2, 160, 160),
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 2, 2, 160, 160 ),
+    iconRect   = { x = 22, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 22, y = 64, w = 64, h = 92 },
+    headerRect = { x = 22, y = 54, w = 64, h = 8 },
+    textRect   = { x = 22, y = 128, w = 64, h = 28 },
 }
 
 style.brightnessUp = {
-    icon = setSprite(164, 2, 160, 160),
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 164, 2, 160, 160 ),
+    iconRect   = { x = 86, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 86, y = 64, w = 64, h = 92 },
+    headerRect = { x = 86, y = 54, w = 64, h = 8 },
+    textRect   = { x = 86, y = 128, w = 64, h = 28 },
 }
 
 style.Brightness = function(label1, label2)
@@ -64,66 +65,70 @@ style.Brightness = function(label1, label2)
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css1.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css1.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css1.bgRect
         },
         {
             type  = "image",
             image = css1.icon,
-            imageFrame = css1.iconInfo.imageFrame,
             frame = css1.iconRect
         },
         SetLabel(
             label1,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css1.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css2.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css2.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css2.bgRect
         },
         {
             type  = "image",
-            image = css2.iconInfo.image,
-            imageFrame = css2.iconInfo.imageFrame,
+            image = css2.icon,
             frame = css2.iconRect
         },
         SetLabel(
             label2,
-            { x = 0, y = 0, w = 100, h = 20 }
-        ),
+            css2.textRect
+        )
     }
 end
 
-local soundDownSlice = setSprite( 326, 2, 160, 160)
 style.soundDown = {
-    iconInfo     = soundDownSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 326, 2, 160, 160 ),
+    iconRect   = { x = 160, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 160, y = 64, w = 64, h = 92 },
+    headerRect = { x = 160, y = 54, w = 64, h = 8 },
+    textRect   = { x = 160, y = 128, w = 64, h = 28 },
 }
 
-local soundUpSlice = setSprite( 488, 2, 160, 160)
 style.soundUp = {
-    iconInfo     = soundUpSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 488, 2, 160, 160 ),
+    iconRect   = { x = 224, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 224, y = 64, w = 64, h = 92 },
+    headerRect = { x = 224, y = 54, w = 64, h = 8 },
+    textRect   = { x = 224, y = 128, w = 64, h = 28 },
 }
 
-local muteSlice = setSprite( 650, 2, 160, 160)
 style.mute = {
-    iconInfo     = muteSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 650, 2, 160, 160 ),
+    iconRect   = { x = 288, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 288, y = 64, w = 64, h = 92 },
+    headerRect = { x = 288, y = 54, w = 64, h = 8 },
+    textRect   = { x = 288, y = 128, w = 64, h = 28 },
 }
 
 style.Sound = function(label1, label2, label3)
@@ -131,162 +136,181 @@ style.Sound = function(label1, label2, label3)
     local css2 = style.soundUp
     local css3 = style.mute
     return {
+       {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.headerColor,
+            frame = css1.headerRect
+        },
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css1.normalBgColor,
+            fillColor = style.color.normalBgColor,
             frame = css1.bgRect
         },
         {
             type  = "image",
-            image = css1.iconInfo.image,
-            imageFrame = css1.iconInfo.imageFrame,
+            image = css1.icon,
             frame = css1.iconRect
         },
         SetLabel(
             label1,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css1.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css2.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css2.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css2.bgRect
         },
         {
             type  = "image",
-            image = css2.iconInfo.image,
-            imageFrame = css2.iconInfo.imageFrame,
+            image = css2.icon,
             frame = css2.iconRect
         },
         SetLabel(
             label2,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css2.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css3.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css3.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css3.bgRect
         },
         {
             type  = "image",
-            image = css3.iconInfo.image,
-            imageFrame = css3.iconInfo.imageFrame,
+            image = css3.icon,
             frame = css3.iconRect
         },
         SetLabel(
             label3,
-            { x = 0, y = 0, w = 100, h = 20 }
-        ),
+            css3.textRect
+        )
     }
 end
 
-local prevSlice = setSprite( 812, 2, 160, 160)
 style.prev = {
-    iconInfo     = prevSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 812, 2, 160, 160 ),
+    iconRect   = { x = 362, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 362, y = 64, w = 64, h = 92 },
+    headerRect = { x = 362, y = 54, w = 64, h = 8 },
+    textRect   = { x = 362, y = 128, w = 64, h = 28 },
 }
 
-local playPauseSlice = setSprite( 974, 2, 160, 160)
 style.playPause = {
-    iconInfo     = playPauseSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 974, 2, 160, 160 ),
+    iconRect   = { x = 426, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 426, y = 64, w = 64, h = 92 },
+    headerRect = { x = 426, y = 54, w = 64, h = 8 },
+    textRect   = { x = 426, y = 128, w = 64, h = 28 },
 }
 
-local nextSlice = setSprite( 1136, 2, 160, 160)
 style.next = {
-    iconInfo     = nextSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 1136, 2, 160, 160 ),
+    iconRect   = { x = 490, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 490, y = 64, w = 64, h = 92 },
+    headerRect = { x = 490, y = 54, w = 64, h = 8 },
+    textRect   = { x = 490, y = 128, w = 64, h = 28 },
 }
-
 
 style.MediaControl = function(label1, label2, label3)
-    local css1 = style.playPause
-    local css2 = style.next
-    local css3 = style.prev
+    local css1 = style.prev
+    local css2 = style.playPause
+    local css3 = style.next
     return {
+       {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.headerColor,
+            frame = css1.headerRect
+        },
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css1.normalBgColor,
+            fillColor = style.color.normalBgColor,
             frame = css1.bgRect
         },
         {
             type  = "image",
-            image = css1.iconInfo.image,
-            imageFrame = css1.iconInfo.imageFrame,
+            image = css1.icon,
             frame = css1.iconRect
         },
         SetLabel(
             label1,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css1.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css2.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css2.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css2.bgRect
         },
         {
             type  = "image",
-            image = css2.iconInfo.image,
-            imageFrame = css2.iconInfo.imageFrame,
+            image = css2.icon,
             frame = css2.iconRect
         },
         SetLabel(
             label2,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css2.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css3.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css3.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css3.bgRect
         },
         {
             type  = "image",
-            image = css3.iconInfo.image,
-            imageFrame = css3.iconInfo.imageFrame,
+            image = css3.icon,
             frame = css3.iconRect
         },
         SetLabel(
             label3,
-            { x = 0, y = 0, w = 100, h = 20 }
-        ),
+            css3.textRect
+        )
     }
 end
 
-local illuminationDownSlice = setSprite( 1298, 2, 160, 160)
 style.illuminationDown = {
-    iconInfo     = illuminationDownSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 1298, 2, 160, 160 ),
+    iconRect   = { x = 564, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 564, y = 64, w = 64, h = 92 },
+    headerRect = { x = 564, y = 54, w = 64, h = 8 },
+    textRect   = { x = 564, y = 128, w = 64, h = 28 },
 }
 
-local illuminationUpSlice = setSprite( 1460, 2, 160, 160)
 style.illuminationUp = {
-    iconInfo     = illuminationUpSlice,
-    iconRect = { x = 0, y = 0, w = 32, h = 32 },
-    bgRect   = { x = 0, y = 0, w = 32, h = 32 },
-    pressedElementColor = {},
-    normalBgColor  = {},
-    pressedBgColor = {}
+    icon       = setSprite( 1460, 2, 160, 160 ),
+    iconRect   = { x = 628, y = 64, w = 64, h = 64 },
+    bgRect     = { x = 628, y = 64, w = 64, h = 92 },
+    headerRect = { x = 628, y = 54, w = 64, h = 8 },
+    textRect   = { x = 628, y = 128, w = 64, h = 28 },
 }
 
 style.Illumination = function(label1, label2)
@@ -296,35 +320,45 @@ style.Illumination = function(label1, label2)
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css1.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css1.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css1.bgRect
         },
         {
             type  = "image",
-            image = css1.iconInfo.image,
-            imageFrame = css1.iconInfo.imageFrame,
+            image = css1.icon,
             frame = css1.iconRect
         },
         SetLabel(
             label1,
-            { x = 0, y = 0, w = 100, h = 20 }
+            css1.textRect
         ),
         {
             type = "rectangle",
             action = "fill",
-            fillColor = css2.normalBgColor,
+            fillColor = style.color.headerColor,
+            frame = css2.headerRect
+        },
+        {
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
             frame = css2.bgRect
         },
         {
             type  = "image",
-            image = css2.iconInfo.image,
-            imageFrame = css2.iconInfo.imageFrame,
+            image = css2.icon,
             frame = css2.iconRect
         },
         SetLabel(
             label2,
-            { x = 0, y = 0, w = 100, h = 20 }
-        ),
+            css2.textRect
+        )
     }
 end
 
