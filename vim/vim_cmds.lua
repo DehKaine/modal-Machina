@@ -102,6 +102,13 @@ vim_cmds.map = {
     ["l"] = function()
         hs.eventtap.keyStroke({}, "right", 0)
     end,
+    -------------------------------------------- 
+    ["bl"] = function()
+        hs.eventtap.keyStroke({"cmd"}, "left", 0)
+        hs.eventtap.keyStroke({"shift", "cmd"}, "right", 0)
+        hs.eventtap.keyStroke({"cmd"}, "b", 0)
+        hs.eventtap.keyStroke({}, "right", 0)
+    end,
     -- reload hammer spoon
     ["rhs"] = function ()
         print("Vim Mode: Reloading Hammerspoon")

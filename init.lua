@@ -9,7 +9,7 @@ require("input_utils.cursor_navigator.cursor_navi_core")
 require("input_utils.single_key")
 require("input_utils.multi_keys")
 require("input_utils.win_flow")
-require("input_utils.media_controller")
+require("input_utils.media_controller.media_controller")
 
 -- overlay_utils
 require("overlay_utils.memocho")
