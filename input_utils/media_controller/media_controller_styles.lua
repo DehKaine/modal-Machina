@@ -26,9 +26,11 @@ style.color = {
     selectedTextColor   = Color.SetByHex("464646"),
     headerColor         = Color.SetByHex("343434"),
     normalBgColor       = Color.SetByHex("464646"),
-    pressedBgColor      = { white = 0.3, alpha = 0.8 },
+    pressedBgColor      = Color.SetByHex("b1d1a5"),
     normalElementColor  = { white = 1,   alpha = 0.8 },
-    pressedElementColor = { white = 1,   alpha = 1   }
+    pressedElementColor = { white = 1,   alpha = 1   },
+    activeBarColor      = Color.SetByHex("b1d1a5"),
+    barUnderlayColor    = Color.SetByHex("464646"),
 }
 
 style.bgPanel = {
@@ -38,9 +40,7 @@ style.bgPanel = {
     frame = { x = 0, y = 0, w = 712, h = 180 }
 }
 
-style.processBar = {
-    
-}
+style.brightnessBar = { x = 22, y = 54, w = 128, h = 8 }
 
 style.brightnessDown = {
     icon       = setSprite( 2, 2, 160, 160 ),
@@ -106,6 +106,8 @@ style.Brightness = function(label1, label2)
         )
     }
 end
+
+style.soundBar = { x = 160, y = 54, w = 128, h = 8 }
 
 style.soundDown = {
     icon       = setSprite( 326, 2, 160, 160 ),

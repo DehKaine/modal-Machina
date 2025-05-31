@@ -20,6 +20,7 @@ local mediaKeyMap = {
 }
 
 local bgCanvas = nil
+local barCanvas = nil
 local eventtap = nil
 
 local function mergeTables(...)
@@ -30,6 +31,32 @@ local function mergeTables(...)
         end
     end
     return merged
+end
+
+local function drawProgressBar(frame, value)
+    local barItems = {}
+    local maxBars = 16
+    local spacing = 2
+    local barWidth = (frame.w - (maxBars - 1) * spacing) / maxBars
+    local activeCount = math.floor((value / 100) * maxBars + 0.5)
+
+    for i = 1, maxBars do
+        local color = i <= activeCount and Style.color.activeBarColor or Style.color.barUnderlayColor
+        table.insert(barItems, {
+            type = "rectangle",
+            action = "fill",
+            frame = {
+                x = frame.x + (i - 1) * (barWidth + spacing),
+                y = frame.y,
+                w = barWidth,
+                h = frame.h
+            },
+            fillColor = color
+        })
+    end
+
+
+    return barItems
 end
 
 local function drawPanel()
@@ -54,14 +81,18 @@ local function drawPanel()
         )
     )
 
-    local keys = {}
-    for k, _ in pairs(mediaKeyMap) do
-        table.insert(keys, k)
-    end
-    table.sort(keys)
-
+    barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
+    local brightnessValue = hs.brightness.get() or 0
+    local soundValue = hs.audiodevice.defaultOutputDevice():volume() or 0
+    barCanvas:appendElements(
+        mergeTables(
+            drawProgressBar(Style.brightnessBar, brightnessValue),
+            drawProgressBar(Style.soundBar, soundValue)
+        )
+    )
 
  end
+
 
 local function triggerMedia(key)
     local action = mediaKeyMap[key]
@@ -103,6 +134,7 @@ end
 
 function modal:exited()
     if bgCanvas then bgCanvas:delete() bgCanvas = nil end
+    if barCanvas then barCanvas:delete() barCanvas = nil end
     if eventtap then eventtap:stop() eventtap = nil end
     master_eventtap.unregister(mediaHandler)
     musicBlocker:stop()
