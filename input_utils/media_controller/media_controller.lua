@@ -40,8 +40,15 @@ local function drawProgressBar(frame, value)
     local barWidth = (frame.w - (maxBars - 1) * spacing) / maxBars
     local activeCount = math.floor((value / 100) * maxBars + 0.5)
 
+    table.insert(barItems, {
+        type = "rectangle",
+        action = "fill",
+        frame = { x = frame.x, y = frame.y + frame.h + 2, w = frame.w, h = 2 },
+        fillColor = Style.color.activeBarColor
+    })
+
     for i = 1, maxBars do
-        local color = i <= activeCount and Style.color.activeBarColor or Style.color.barUnderlayColor
+        local color = i <= activeCount and Style.color.activeBarColor or Style.color.inactiveBarColor
         table.insert(barItems, {
             type = "rectangle",
             action = "fill",
@@ -54,8 +61,6 @@ local function drawProgressBar(frame, value)
             fillColor = color
         })
     end
-
-
     return barItems
 end
 
@@ -70,7 +75,8 @@ local function drawPanel()
     local x = screenFrame.x + (screenFrame.w - width) / 2
     local y = screenFrame.y + (screenFrame.h - height) / 2
 
-    bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
+    bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}
+    -- bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
     bgCanvas:appendElements(
         mergeTables(
             { Style.bgPanel },
@@ -81,7 +87,8 @@ local function drawPanel()
         )
     )
 
-    barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
+    -- barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
+    barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}
     local brightnessValue = hs.brightness.get() or 0
     local soundValue = hs.audiodevice.defaultOutputDevice():volume() or 0
     barCanvas:appendElements(
@@ -91,16 +98,57 @@ local function drawPanel()
         )
     )
 
- end
+    bgCanvas:show(0.25)
+    barCanvas:show(0.25)
+end
 
+local function updateBarValue()
+    local brightnessValue = hs.brightness.get() or 0
+    local soundValue = hs.audiodevice.defaultOutputDevice():volume() or 0
+    if barCanvas then
+        barCanvas:replaceElements(
+            mergeTables(
+                drawProgressBar(Style.brightnessBar, brightnessValue),
+                drawProgressBar(Style.soundBar, soundValue)
+            )
+        )
+    end
+end
+
+local function highlightKey(key, restore)
+    if not bgCanvas then return end
+    restore = restore or false
+    local id1 = "label_" .. key
+    local id2 = "rect_" .. key
+    local ele1 = bgCanvas[id1]
+    local ele2 = bgCanvas[id2]
+    if ele1 and ele2 then
+        if not restore then
+            ele1.textColor = Style.color.pressedTextColor
+            ele2.fillColor = Style.color.pressedBgColor
+        else
+            ele1.textColor = Style.color.normalTextColor
+            ele2.fillColor = Style.color.normalBgColor
+        end
+    end
+end
 
 local function triggerMedia(key)
     local action = mediaKeyMap[key]
     if not action then return end
     local event = hs.eventtap.event.newSystemKeyEvent(action, true)
+    highlightKey(key)
+    hs.timer.doAfter(0.2, function()
+        highlightKey(key, true)
+    end)
     event:post()
     local eventUp = hs.eventtap.event.newSystemKeyEvent(action, false)
     eventUp:post()
+    if action:find("BRIGHTNESS") or action:find("SOUND") then
+        hs.timer.doAfter(0.1, function()
+            updateBarValue()
+        end)
+    end
 end
 
 local function mediaHandler(event)
@@ -133,8 +181,8 @@ function modal:entered()
 end
 
 function modal:exited()
-    if bgCanvas then bgCanvas:delete() bgCanvas = nil end
-    if barCanvas then barCanvas:delete() barCanvas = nil end
+    if bgCanvas then bgCanvas:delete(0.2) bgCanvas = nil end
+    if barCanvas then barCanvas:delete(0.2) barCanvas = nil end
     if eventtap then eventtap:stop() eventtap = nil end
     master_eventtap.unregister(mediaHandler)
     musicBlocker:stop()

@@ -9,15 +9,24 @@ local function setSprite( x, y, w, h )
 end
 
 local function SetLabel(textName, frame)
-   return {
-        type  = "text",
-        text  = textName,
-        textFont  = "Monaco",
-        textSize  = 18,
-        textColor = style.color.normalTextColor,
-        textAlignment = "center",
-        frame = frame or { x = 0, y = 0, w = 100, h = 20 }
-    }
+    local underlay = {
+            id = "rect_" .. textName,
+            type = "rectangle",
+            action = "fill",
+            fillColor = style.color.normalBgColor,
+            frame = frame
+        }
+    local label = {
+            id    = "label_" .. textName,
+            type  = "text",
+            text  = textName,
+            textFont  = "Monaco",
+            textSize  = 18,
+            textColor = style.color.normalTextColor,
+            textAlignment = "center",
+            frame = frame
+        }
+    return underlay, label
 end
 
 style.color = {
@@ -30,13 +39,13 @@ style.color = {
     normalElementColor  = { white = 1,   alpha = 0.8 },
     pressedElementColor = { white = 1,   alpha = 1   },
     activeBarColor      = Color.SetByHex("b1d1a5"),
-    barUnderlayColor    = Color.SetByHex("464646"),
+    inactiveBarColor    = Color.SetByHex("343434"),
+    barUnderlayColor    = Color.SetByHex("272727"),
 }
 
 style.bgPanel = {
     type = "image",
     image = setSprite(2, 164, 1784, 424),
-    -- imageAlignment = "center",
     frame = { x = 0, y = 0, w = 712, h = 180 }
 }
 
@@ -45,7 +54,7 @@ style.brightnessBar = { x = 22, y = 54, w = 128, h = 8 }
 style.brightnessDown = {
     icon       = setSprite( 2, 2, 160, 160 ),
     iconRect   = { x = 22, y = 64, w = 64, h = 64 },
-    bgRect     = { x = 22, y = 64, w = 64, h = 92 },
+    bgRect     = { x = 22, y = 64, w = 64, h = 64 },
     headerRect = { x = 22, y = 54, w = 64, h = 8 },
     textRect   = { x = 22, y = 128, w = 64, h = 28 },
 }
@@ -53,7 +62,7 @@ style.brightnessDown = {
 style.brightnessUp = {
     icon       = setSprite( 164, 2, 160, 160 ),
     iconRect   = { x = 86, y = 64, w = 64, h = 64 },
-    bgRect     = { x = 86, y = 64, w = 64, h = 92 },
+    bgRect     = { x = 86, y = 64, w = 64, h = 64 },
     headerRect = { x = 86, y = 54, w = 64, h = 8 },
     textRect   = { x = 86, y = 128, w = 64, h = 28 },
 }
@@ -61,11 +70,13 @@ style.brightnessUp = {
 style.Brightness = function(label1, label2)
     local css1 = style.brightnessDown
     local css2 = style.brightnessUp
+    local textUnder1, textLabel1 = SetLabel(label1, css1.textRect)
+    local textUnder2, textLabel2 = SetLabel(label2, css2.textRect)
     return {
         {
             type = "rectangle",
             action = "fill",
-            fillColor = style.color.headerColor,
+            fillColor = style.color.barUnderlayColor,
             frame = css1.headerRect
         },
         {
@@ -79,14 +90,12 @@ style.Brightness = function(label1, label2)
             image = css1.icon,
             frame = css1.iconRect
         },
-        SetLabel(
-            label1,
-            css1.textRect
-        ),
+        textUnder1,
+        textLabel1,
         {
             type = "rectangle",
             action = "fill",
-            fillColor = style.color.headerColor,
+            fillColor = style.color.barUnderlayColor,
             frame = css2.headerRect
         },
         {
@@ -100,10 +109,8 @@ style.Brightness = function(label1, label2)
             image = css2.icon,
             frame = css2.iconRect
         },
-        SetLabel(
-            label2,
-            css2.textRect
-        )
+        textUnder2,
+        textLabel2
     }
 end
 
@@ -141,7 +148,7 @@ style.Sound = function(label1, label2, label3)
        {
             type = "rectangle",
             action = "fill",
-            fillColor = style.color.headerColor,
+            fillColor = style.color.barUnderlayColor,
             frame = css1.headerRect
         },
         {
@@ -162,7 +169,7 @@ style.Sound = function(label1, label2, label3)
         {
             type = "rectangle",
             action = "fill",
-            fillColor = style.color.headerColor,
+            fillColor = style.color.barUnderlayColor,
             frame = css2.headerRect
         },
         {
@@ -183,7 +190,7 @@ style.Sound = function(label1, label2, label3)
         {
             type = "rectangle",
             action = "fill",
-            fillColor = style.color.headerColor,
+            fillColor = style.color.barUnderlayColor,
             frame = css3.headerRect
         },
         {
