@@ -33,6 +33,34 @@ local function mergeTables(...)
     return merged
 end
 
+local function checkMute()
+    local device = hs.audiodevice.defaultOutputDevice()
+    local isMuted = device:muted()
+    if bgCanvas then
+        local muteHeader = bgCanvas["mute_header"]
+        local muteIcon = bgCanvas["mute_icon_image"]
+        local muteBg = bgCanvas["mute_icon_underlay"]
+        if isMuted then
+            muteHeader.fillColor = Style.color.selectedEleColor
+            muteHeader.frame.x = Style.mute.headerRect.x + 1
+            muteHeader.frame.w = Style.mute.headerRect.w - 1
+            muteIcon.image = Style.mute.icon_selected
+            muteBg.frame = Style.mute.seletedRect
+            muteBg.action = "strokeAndFill"
+            muteBg.strokeColor = Style.color.selectedEleColor
+            muteBg.strokeWidth = 2
+        else
+            muteHeader.fillColor = Style.color.barUnderlayColor
+            muteHeader.frame = Style.mute.headerRect
+            muteIcon.image = Style.mute.icon
+            muteBg.action = "fill"
+            muteBg.frame = Style.mute.iconRect
+            muteBg.strokeColor = nil
+            muteBg.strokeWidth = nil
+        end
+    end
+end
+
 local function drawProgressBar(frame, value)
     local barItems = {}
     local maxBars = 16
@@ -76,7 +104,6 @@ local function drawPanel()
     local y = screenFrame.y + (screenFrame.h - height) / 2
 
     bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}
-    -- bgCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
     bgCanvas:appendElements(
         mergeTables(
             { Style.bgPanel },
@@ -87,7 +114,6 @@ local function drawPanel()
         )
     )
 
-    -- barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}:show()
     barCanvas = hs.canvas.new{x = x, y = y, w = width, h = height}
     local brightnessValue = hs.brightness.get() or 0
     local soundValue = hs.audiodevice.defaultOutputDevice():volume() or 0
@@ -97,6 +123,8 @@ local function drawPanel()
             drawProgressBar(Style.soundBar, soundValue)
         )
     )
+
+    checkMute()
 
     bgCanvas:show(0.25)
     barCanvas:show(0.25)
@@ -144,8 +172,9 @@ local function triggerMedia(key)
     event:post()
     local eventUp = hs.eventtap.event.newSystemKeyEvent(action, false)
     eventUp:post()
-    if action:find("BRIGHTNESS") or action:find("SOUND") then
+    if action:find("BRIGHTNESS") or action:find("SOUND") or action:find("MUTE") then
         hs.timer.doAfter(0.1, function()
+            checkMute()
             updateBarValue()
         end)
     end
