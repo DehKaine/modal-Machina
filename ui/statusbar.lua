@@ -1,5 +1,4 @@
-
-local status = {}
+local vim_status = {}
 
 local canvas
 local hideTimer
@@ -70,13 +69,13 @@ local function flash(text,delay)
     end)
 end
 
-status.show = show
-status.flash = flash
-status.hide = function()
+vim_status.show = show
+vim_status.flash = flash
+vim_status.hide = function()
     if canvas and visible then
         canvas:hide()
         visible = false
     end
 end
 
-return status
+return vim_status

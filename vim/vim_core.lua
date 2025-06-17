@@ -1,6 +1,7 @@
 local master_eventtap = require("master_eventtap")
 local status = require("ui.statusbar")
 local vim_cmds = require("vim.vim_cmds")
+local Indicator = require("ui.status_indicator.status_indicator")
 --
 local vim_core = {}
 --

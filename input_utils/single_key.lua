@@ -11,7 +11,7 @@ local noModMap = {
 
 -- shift组合键映射
 local shiftModMap = {
-    ["-"] = "+",
+    -- ["-"] = "+",
 }
 
 -- alt组合键映射
