@@ -110,6 +110,7 @@ local function vim_handler(event)
     if tonumber(char) and not char:match("%a") then
         prefixNumber = prefixNumber .. char
         status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
+        Indicator.Vim.Update(prefixNumber .. cmdBuffer)
         return true
     end
     -- 只拦截英文字母；其余字符放行
@@ -129,6 +130,7 @@ local function vim_handler(event)
     if matched then
         cmdBuffer = newBuffer
         status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
+        Indicator.Vim.Update(prefixNumber .. cmdBuffer)
     else
         --
     end
@@ -161,12 +163,16 @@ end
 function modal:entered()
     cmdBuffer = ""
     prefixNumber = ""
+    Indicator.HideMachinaIcon()
+    Indicator.Vim.Show()
     status.show("Vim Mode: ON")
     master_eventtap.register(vim_handler)
 end
 
 function modal:exited()
     status.hide()
+    Indicator.Vim.Close()
+    Indicator.ShowMachinaIcon()
     master_eventtap.unregister(vim_handler)
     if exitTimer then
         exitTimer:stop()

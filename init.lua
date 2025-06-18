@@ -17,3 +17,7 @@ require("overlay_utils.memocho")
 -- master event manager
 local master_eventtap = require("master_eventtap")
 master_eventtap.start()
+
+-- indicator
+local Indicator = require("ui.status_indicator.status_indicator")
+Indicator.ShowMachinaIcon()

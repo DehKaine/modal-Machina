@@ -36,6 +36,45 @@ local function SetLabel (textName, frame)
     return text, label
 end
 
+style.MachinaIcon = function (menubarFrame)
+    return {
+        -- {
+        --     id          = "machina_icon",
+        --     type        = "image",
+        --     image       = hs.image.imageFromPath("~/.HAMMERSPOON/ui/sprite/machina/machina_icon.png"),
+        --     frame       = { x = 0, y = 0, w = 24, h = 24 },
+        --     imageScaling = "scaleProportionallyToFit"
+        -- },
+        {
+            type        = "rectangle",
+            action      = "fill",
+            fillColor   = style.color.vim_cmd_bar,
+            frame       = {
+                x = menubarFrame.w - offsetX - 22,
+                y = 4,
+                w = 22,
+                h = 16
+            },
+            roundedRectRadii = { xRadius = 2, yRadius = 2 },
+        },
+        {
+            id          = "machina_label",
+            type        = "text",
+            text        = "M",
+            textFont    = "Adelle Sans Devanagari Bold",
+            textSize    = 14,
+            textColor   = style.color.vim_label,
+            textAlignment = "center",
+            frame       = {
+                x = menubarFrame.w - offsetX - 22,
+                y = 4 - 6,
+                w = 22,
+                h = 16 + 8
+            }
+        }
+    }
+end
+
 style.vim_statusbar = { 
     whole_width = 110,
     label_rect = { x = 0, y = 4, w = 44, h = 16 },
@@ -45,13 +84,13 @@ style.vim_statusbar = {
 style.VimStatus = function(textName, menubarFrame)
     local labelFrame = {
         x = menubarFrame.w - offsetX - style.vim_statusbar.whole_width,
-        y = menubarFrame.y + style.vim_statusbar.label_rect.y,
+        y = style.vim_statusbar.label_rect.y,
         w = style.vim_statusbar.label_rect.w,
         h = style.vim_statusbar.label_rect.h
     }
     local cmdbarFrame = {
         x = labelFrame.x + style.vim_statusbar.cmd_bar_rect.x,
-        y = menubarFrame.y + style.vim_statusbar.cmd_bar_rect.y,
+        y = style.vim_statusbar.cmd_bar_rect.y,
         w = style.vim_statusbar.cmd_bar_rect.w,
         h = style.vim_statusbar.cmd_bar_rect.h
     }
@@ -65,6 +104,22 @@ style.VimStatus = function(textName, menubarFrame)
             fillColor   = style.color.vim_cmd_bar,
             frame       = { x = cmdbarFrame.x, y = cmdbarFrame.y, w = cmdbarFrame.w, h = cmdbarFrame.h },
             roundedRectRadii = { xRadius = 2, yRadius = 2 },
+        },
+        {
+            id            = "cmd_text",
+            type          = "text",
+            text          = "",
+            -- textFont      = "Adelle Sans Devanagari Semibold",
+            textFont      = "Monaco",
+            textSize      = 11,
+            textColor     = style.color.vim_label,
+            textAlignment = "left",
+            frame = {
+                x = cmdbarFrame.x + 3,
+                y = cmdbarFrame.y + 1,
+                w = cmdbarFrame.w,
+                h = cmdbarFrame.h + 8
+            }
         }
     }
 end

@@ -1,79 +1,100 @@
 local Style = require("ui.status_indicator.status_indicator_styles")
 --
 local Indicator = {}
+Indicator.Vim = {}
 
-local modal_icon_canvas = nil
-local vim_indicator_canvas = nil
+local menubarFrames = {}
+--
+local machina_icon_canvas = {}
+local vim_indicator_canvases = {}
 -- local cursor_navigator_canvas = nil
 -- local media_controller_canvas = nil
+local indicatorInitialized = false
 
 local function GetAllMenubarFrames()
-    local frames = {}
+    menubarFrames = {}
     for _, screen in ipairs(hs.screen.allScreens()) do
         local fullFrame = screen:fullFrame()
-        local menubarFrame = {
-            x = fullFrame.x,
-            y = fullFrame.y,
-            w = fullFrame.w,
-            h = 24
-        }
-        table.insert(frames, menubarFrame)
+        local menubarFrame = { x = fullFrame.x, y = fullFrame.y, w = fullFrame.w, h = 24 }
+        table.insert(menubarFrames, menubarFrame)
     end
-    return frames
 end
 
-Indicator.ShowModalIcon = function()
-    if not modal_icon_canvas then
-        modal_icon_canvas = hs.canvas.new{
-            x = 0,
-            y = 0,
-            w = 0,
-            h = 0
+Indicator.ShowMachinaIcon = function()
+    if indicatorInitialized then
+        for _, canvas in ipairs(machina_icon_canvas) do
+            canvas:show()
+        end
+        return
+    else
+        GetAllMenubarFrames()
+        machina_icon_canvas = {}
+        for i, menubarFrame in ipairs(menubarFrames) do
+            local canvas = hs.canvas.new{
+                x = menubarFrame.x,
+                y = menubarFrame.y,
+                w = menubarFrame.w,
+                h = menubarFrame.h
+            }:level("status")
+            canvas:appendElements(
+                Style.MachinaIcon(menubarFrame)
+            )
+            canvas:show()
+        end
+        indicatorInitialized = true
+    end
+end
+
+Indicator.HideMachinaIcon = function()
+    if not indicatorInitialized then
+        return
+    end
+    for _, canvas in ipairs(machina_icon_canvas) do
+        canvas:hide()
+    end
+    machina_icon_canvas = {}
+end
+
+function Indicator.Vim.Show()
+    GetAllMenubarFrames()
+    vim_indicator_canvases = {}
+    for i, menubarFrame in ipairs(menubarFrames) do
+        local canvas = hs.canvas.new{
+            x = menubarFrame.x,
+            y = menubarFrame.y,
+            w = menubarFrame.w,
+            h = menubarFrame.h
         }:level("status")
          :behavior({"canJoinAllSpaces"})
+        canvas:appendElements(
+            Style.VimStatus("VIM", menubarFrame)
+        )
+        canvas:show()
+        vim_indicator_canvases[i] = canvas
     end
-    modal_icon_canvas:show()
 end
 
-Indicator.ShowVimIndicator = function()
-    -- local menubarFrames = GetAllMenubarFrames()
-    -- for _, menubarFrame in ipairs(menubarFrames) do
-    --     -- create a new canvas with the menubar frame and proper level/behavior
-    --     local indicator_canvas = hs.canvas.new{
-    --         x = menubarFrame.x,
-    --         y = menubarFrame.y,
-    --         w = menubarFrame.w,
-    --         h = menubarFrame.h
-    --     }:level("status")
-    --      :behavior({"canJoinAllSpaces"})
-    --     -- append the styled elements and show
-    --     indicator_canvas:appendElements(
-    --         Style.VimStatus("VIM", menubarFrame)
-    --     )
-    --     indicator_canvas:show()
-    -- end
-    local fullFrame = hs.screen.mainScreen():fullFrame()
-    local menubarFrame = {
-        x = fullFrame.x,
-        y = fullFrame.y,
-        w = fullFrame.w,
-        h = 24
-    }
-    vim_indicator_canvas = hs.canvas.new{
-        x = menubarFrame.x,
-        y = menubarFrame.y,
-        w = menubarFrame.w,
-        h = menubarFrame.h
-    }:level("status")
-     :behavior({"canJoinAllSpaces"})
+function Indicator.Vim.Update(cmd)
+    cmd = cmd or ""
+    for _, canvas in ipairs(vim_indicator_canvases) do
+        local cmdTextField = canvas["cmd_text"]
+        cmdTextField.text = cmd
+    end
+end
 
-    vim_indicator_canvas:appendElements(
-        Style.VimStatus("VIM", menubarFrame)
-    )
- end
+function Indicator.Vim.Close()
+    Indicator.ShowMachinaIcon()
+    for _, canvas in ipairs(vim_indicator_canvases) do
+        canvas:hide()
+        canvas:delete()
+        canvas = nil
+    end
+    vim_indicator_canvases = {}
+end
 
 hs.hotkey.bind({"cmd", "alt"}, "v", function()
-    Indicator.ShowVimIndicator()
+    -- Test Func
+    Indicator.Vim.Show()
 end)
 
 return Indicator
