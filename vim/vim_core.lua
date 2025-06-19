@@ -101,23 +101,31 @@ local function vim_handler(event)
     if flags.cmd or flags.alt or flags.ctrl then
         return false   -- 让带修饰键的组合键直接传递给系统
     end
-    if not char or #char ~= 1 then
-        -- 非可打印字符（如 Esc / Function 键），放行给 modal 自己处理
-        return false
-    end
 
-    -- -------- 进入指令累积与匹配 --------
-    -- 判断是否数字前缀（只有当 cmdBuffer 不是字母时才允许数字前缀）
+    -- 数字前缀处理（必须先于非字母检查与 leader）
     if tonumber(char) and not char:match("%a") then
         prefixNumber = prefixNumber .. char
-        -- status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
         Indicator.Vim.Update(prefixNumber .. cmdBuffer)
         return true
     end
+
+    -- Leader key: use space as leader when cmdBuffer is empty
+    if char == " " then
+        if cmdBuffer == "" then
+            cmdBuffer = "<L>"
+            Indicator.Vim.Update(cmdBuffer)
+            return true
+        else
+            return false
+        end
+    end
+
     -- 只拦截英文字母；其余字符放行
     if not char:match("%a") then
         return false
     end
+
+    -- -------- 进入指令累积与匹配 --------
     -- 剔除未匹配的字符
     local newBuffer = cmdBuffer .. char
     local matched = false

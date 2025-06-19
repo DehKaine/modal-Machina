@@ -3,7 +3,7 @@ local menubar_widget = {}
 local vim_statusbar = hs.menubar.new()
 
 local function updateVimStatusbar()
-    local label = "vim_cmd:"
+    local label = "Awake"
     vim_statusbar:setTitle(label)
 end
 
