@@ -1,4 +1,5 @@
 local Style = require("ui.status_indicator.status_indicator_styles")
+local hse = require("hs_enhance.table")
 --
 local Indicator = {}
 Indicator.Vim = {}
@@ -7,7 +8,7 @@ local menubarFrames = {}
 --
 local machina_icon_canvas = {}
 local vim_indicator_canvases = {}
--- local cursor_navigator_canvas = nil
+local cursor_navigator_canvas = nil
 -- local media_controller_canvas = nil
 local indicatorInitialized = false
 
@@ -67,7 +68,10 @@ function Indicator.Vim.Show()
         }:level("status")
          :behavior({"canJoinAllSpaces"})
         canvas:appendElements(
-            Style.VimStatus("VIM", menubarFrame)
+            hse.mergeTables(
+                Style.VimStatus("VIM", menubarFrame),
+                Style.VimExecutedIcon(menubarFrame)
+            )
         )
         canvas:show()
         vim_indicator_canvases[i] = canvas
@@ -82,6 +86,17 @@ function Indicator.Vim.Update(cmd)
     end
 end
 
+function Indicator.Vim.Executed()
+    GetAllMenubarFrames()
+    for _, canvas in ipairs(vim_indicator_canvases) do
+        local executedIcon = canvas["vim_executed_icon"]
+        executedIcon.imageAlpha = 1
+        hs.timer.doAfter(2, function()
+            executedIcon.imageAlpha = 0
+        end)
+    end
+end
+
 function Indicator.Vim.Close()
     Indicator.ShowMachinaIcon()
     for _, canvas in ipairs(vim_indicator_canvases) do
@@ -92,9 +107,22 @@ function Indicator.Vim.Close()
     vim_indicator_canvases = {}
 end
 
-hs.hotkey.bind({"cmd", "alt"}, "v", function()
+hs.hotkey.bind({ "alt"}, "z", function()
     -- Test Func
-    Indicator.Vim.Show()
+    Indicator.Vim.Executed()
+    local fullFrame = hs.screen.mainScreen():fullFrame()
+    local menubarFrame = { x = fullFrame.x, y = fullFrame.y, w = fullFrame.w, h = 24 }
+    cursor_navigator_canvas = hs.canvas.new{
+        x = menubarFrame.x,
+        y = menubarFrame.y,
+        w = menubarFrame.w,
+        h = menubarFrame.h
+    }:level("status")
+    cursor_navigator_canvas:appendElements(
+        Style.VimExecutedIcon(menubarFrame)
+    )
+    cursor_navigator_canvas:show()
+    hs.alert.show("Vim Cmd Executed")
 end)
 
 return Indicator

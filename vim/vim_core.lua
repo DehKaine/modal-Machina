@@ -54,7 +54,8 @@ local function resetExitTimer()
         exitTimer:stop()
     end
     exitTimer = hs.timer.doAfter(10, function()
-        status.flash("Vim Mode: Timeout", 1)
+        -- status.flash("Vim Mode: Timeout", 1)
+        Indicator.Vim.Update("Timeout")
         hs.timer.doAfter(1, function()
             modal:exit()
         end)
@@ -109,7 +110,7 @@ local function vim_handler(event)
     -- 判断是否数字前缀（只有当 cmdBuffer 不是字母时才允许数字前缀）
     if tonumber(char) and not char:match("%a") then
         prefixNumber = prefixNumber .. char
-        status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
+        -- status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
         Indicator.Vim.Update(prefixNumber .. cmdBuffer)
         return true
     end
@@ -129,7 +130,7 @@ local function vim_handler(event)
 
     if matched then
         cmdBuffer = newBuffer
-        status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
+        -- status.show("Vim Cmd: " .. prefixNumber .. cmdBuffer)
         Indicator.Vim.Update(prefixNumber .. cmdBuffer)
     else
         --
@@ -147,7 +148,8 @@ local function vim_handler(event)
             lastCommand = pattern
             cmdBuffer = ""
             prefixNumber = ""
-            status.show("Vim Cmd Executed. Waiting for input... ")
+            Indicator.Vim.Executed()
+            -- status.show("Vim Cmd Executed. Waiting for input... ")
             resetExitTimer()
             break
         end
@@ -165,7 +167,7 @@ function modal:entered()
     prefixNumber = ""
     Indicator.HideMachinaIcon()
     Indicator.Vim.Show()
-    status.show("Vim Mode: ON")
+    -- status.show("Vim Mode: ON")
     master_eventtap.register(vim_handler)
 end
 
@@ -181,7 +183,8 @@ function modal:exited()
 end
 
 modal:bind({}, "escape", function()
-    status.flash("Vim Mode: OFF", 1)
+    -- status.flash("Vim Mode: OFF", 1)
+    Indicator.Vim.Update("Exiting")
     hs.timer.doAfter(1, function()
         modal:exit()
     end)

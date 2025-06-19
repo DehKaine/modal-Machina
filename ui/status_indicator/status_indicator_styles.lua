@@ -124,4 +124,19 @@ style.VimStatus = function(textName, menubarFrame)
     }
 end
 
+style.VimExecutedIcon = function(menubarFrame)
+    return {
+        id    = "vim_executed_icon",
+        type  = "image",
+        image = hs.image.imageFromPath( "~/.HAMMERSPOON/ui/sprite/status_indicator/vim_executed_icon.png"),
+        frame = {
+            x = menubarFrame.w - offsetX - 15,
+            y = 5,
+            w = 13,
+            h = 13
+        },
+        imageAlpha = 0
+    }
+end
+
 return style
