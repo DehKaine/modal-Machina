@@ -1,3 +1,4 @@
+
 local master_eventtap = require("master_eventtap")
 local vim_mode = require("vim.vim_core")
 
@@ -14,6 +15,8 @@ local mediaKeyMap = {
     ["h"] = "PLAY",
     ["j"] = "PREVIOUS",
     ["k"] = "NEXT",
+    ["z"] = "ILLUMINATION_DOWN",
+    ["x"] = "ILLUMINATION_UP",
 }
 
 local bgCanvas = nil
@@ -110,18 +113,27 @@ local function mediaHandler(event)
     return false
 end
 
+-- Block Apple Music from auto-launching
+local musicBlocker = hs.application.watcher.new(function(appName, eventType, appObject)
+    if eventType == hs.application.watcher.launched and appName == "Music" then
+        appObject:kill()
+    end
+end)
+
 function modal:entered()
     if vim_mode then
         vim_mode.exitVim()
     end
     drawPanel()
     master_eventtap.register(mediaHandler)
+    musicBlocker:start()
 end
 
 function modal:exited()
     if bgCanvas then bgCanvas:delete() bgCanvas = nil end
     if eventtap then eventtap:stop() eventtap = nil end
     master_eventtap.unregister(mediaHandler)
+    musicBlocker:stop()
 end
 
 modal:bind({},"escape",function ()

@@ -1,3 +1,4 @@
+local Indicator = require("ui.status_indicator.status_indicator")
 local win_flow = require("input_utils.win_flow")
 --
 local vim_cmds = {}
@@ -67,8 +68,14 @@ vim_cmds.map = {
     ["fi"] = function()
         win_flow.focusToAppByCmd("fi")
     end,
+    ["fI"] = function()
+        win_flow.focusToAppByCmd("fI")
+    end,
     ["fo"] = function()
         win_flow.focusToAppByCmd("fo")
+    end,
+    ["fp"] = function()
+        win_flow.focusToAppByCmd("fp")
     end,
     ["fe"] = function()
         win_flow.focusToAppByCmd("fe")
@@ -99,8 +106,26 @@ vim_cmds.map = {
     ["l"] = function()
         hs.eventtap.keyStroke({}, "right", 0)
     end,
+    -------------------------------------------- 
+    ["bl"] = function()
+        hs.eventtap.keyStroke({"cmd"}, "left", 0)
+        hs.eventtap.keyStroke({"shift", "cmd"}, "right", 0)
+        hs.eventtap.keyStroke({"cmd"}, "b", 0)
+        hs.eventtap.keyStroke({}, "right", 0)
+    end,
+    -------------------------------------------- Leader Commands
     -- reload hammer spoon
+    ["<L>r"] = function()
+        Indicator.Vim.Update("Reload")
+        print("Vim Mode: Reloading Hammerspoon")
+        print("==========>  NEW MACHINA  ==========>")
+        hs.timer.doAfter(0.2, function()
+            hs.reload()
+        end)
+    end,
+    -- reload hammer spoon2
     ["rhs"] = function ()
+        Indicator.Vim.Update("Reload")
         print("Vim Mode: Reloading Hammerspoon")
         print("==========>  NEW MACHINA  ==========>")
         hs.timer.doAfter(0.2, function()

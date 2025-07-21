@@ -15,11 +15,11 @@ local nudgeStep = 2
 -- key maps
 local directionKeys = {"u","i","o",
                        "j",    "l",
-                       "h","k","_"}
+                       "h","k",";"}
 local keyToAnchorMap = {
     u = {r = 2, c = 2}, i = {r = 2, c = 3}, o = {r = 2, c = 4},
     j = {r = 3, c = 2},                     l = {r = 3, c = 4},
-    h = {r = 4, c = 2}, k = {r = 4, c = 3}, ["_"] = {r = 4, c = 4}
+    h = {r = 4, c = 2}, k = {r = 4, c = 3}, [";"] = {r = 4, c = 4}
 }
 local nudgeKeyMap = {
     up   = { x = 0, y = -nudgeStep }, down  = { x = 0, y =  nudgeStep },

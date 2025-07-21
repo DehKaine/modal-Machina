@@ -15,7 +15,7 @@ end
 local anchorsMap = {
     {r = 2, c = 2, key = "u"}, {r = 2, c = 3, key = "i"}, {r = 2, c = 4, key = "o"},
     {r = 3, c = 2, key = "j"},                            {r = 3, c = 4, key = "l"},
-    {r = 4, c = 2, key = "h"}, {r = 4, c = 3, key = "k"}, {r = 4, c = 4, key = "_"},
+    {r = 4, c = 2, key = "h"}, {r = 4, c = 3, key = "k"}, {r = 4, c = 4, key = ";"},
 }
 
 function NaviCanvas:generateGridPoints(focusArea)
