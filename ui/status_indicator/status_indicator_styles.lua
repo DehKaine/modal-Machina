@@ -3,6 +3,7 @@ local Color = require("hs_enhance.color")
 local style = {}
 
 local offsetX = 432
+-- local offsetX = 432 + 36
 
 style.color = {
     modal_label       = Color.SetByHex("b1d1a5"),
@@ -38,13 +39,6 @@ end
 
 style.MachinaIcon = function (menubarFrame)
     return {
-        -- {
-        --     id          = "machina_icon",
-        --     type        = "image",
-        --     image       = hs.image.imageFromPath("~/.HAMMERSPOON/ui/sprite/machina/machina_icon.png"),
-        --     frame       = { x = 0, y = 0, w = 24, h = 24 },
-        --     imageScaling = "scaleProportionallyToFit"
-        -- },
         {
             type        = "rectangle",
             action      = "fill",
@@ -75,7 +69,7 @@ style.MachinaIcon = function (menubarFrame)
     }
 end
 
-style.vim_statusbar = { 
+style.vim_statusbar = {
     whole_width = 110,
     label_rect = { x = 0, y = 4, w = 44, h = 16 },
     cmd_bar_rect = { x = 48, y = 4, w = 62, h = 16 },
@@ -109,7 +103,6 @@ style.VimStatus = function(textName, menubarFrame)
             id            = "cmd_text",
             type          = "text",
             text          = "",
-            -- textFont      = "Adelle Sans Devanagari Semibold",
             textFont      = "Monaco",
             textSize      = 11,
             textColor     = style.color.vim_label,
@@ -136,6 +129,12 @@ style.VimExecutedIcon = function(menubarFrame)
             h = 13
         },
         imageAlpha = 0
+    }
+end
+
+style.CursorNaviStatus = function(frame)
+    return {
+        frame
     }
 end
 

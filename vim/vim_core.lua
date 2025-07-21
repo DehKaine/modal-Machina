@@ -9,12 +9,18 @@ local command_map = vim_cmds.map
 local single_exec_commands = vim_cmds.single_exec_cmds
 
 local modal = hs.hotkey.modal.new({"alt"}, "space")
+--
+local cmdBuffer = ""
+local prefixNumber = ""
+local lastCommand = nil
+local lastCount = 1
+local exitTimer = nil
 
 local longPressThreshold = 0.2
 local longPressStartTime = 0
 local longPressedTime = nil
 
-local longPressTrigger = hs.hotkey.bind({}, ";",
+local longPressTrigger = hs.hotkey.bind({}, "§",
     function ()
         longPressedTime = nil
         longPressStartTime = hs.timer.secondsSinceEpoch()
@@ -43,17 +49,11 @@ local longPressTrigger = hs.hotkey.bind({}, ";",
     end
 )
 
---
-local cmdBuffer = ""
-local prefixNumber = ""
-local lastCommand = nil
-
-local exitTimer = nil
 local function resetExitTimer()
     if exitTimer then
         exitTimer:stop()
     end
-    exitTimer = hs.timer.doAfter(10, function()
+    exitTimer = hs.timer.doAfter(8, function()
         -- status.flash("Vim Mode: Timeout", 1)
         Indicator.Vim.Update("Timeout")
         hs.timer.doAfter(1, function()
@@ -82,14 +82,15 @@ local function vim_handler(event)
     local char = event:getCharacters(true)  -- true = 忽略修饰键影响、直接取字符
     if char == "." then
         if lastCommand and command_map[lastCommand] then
-            local count = tonumber(prefixNumber) or 1
+            local count = lastCount or 1
             if is_single_exec_command(lastCommand) then
                 count = 1
             end
             for i = 1, count do
                 command_map[lastCommand]()
             end
-            status.flash("Vim Cmd Executed", 2)
+            -- status.flash("Vim Cmd Executed", 2)
+            Indicator.Vim.Executed()
             resetExitTimer()
         end
         cmdBuffer = ""
@@ -99,10 +100,10 @@ local function vim_handler(event)
 
     local flags = event:getFlags()
     if flags.cmd or flags.alt or flags.ctrl then
-        return false   -- 让带修饰键的组合键直接传递给系统
+        return false
     end
 
-    -- 数字前缀处理（必须先于非字母检查与 leader）
+    -- 数字前缀处理（先于非字母检查与 leader）
     if tonumber(char) and not char:match("%a") then
         prefixNumber = prefixNumber .. char
         Indicator.Vim.Update(prefixNumber .. cmdBuffer)
@@ -154,6 +155,7 @@ local function vim_handler(event)
                 action()
             end
             lastCommand = pattern
+            lastCount = count
             cmdBuffer = ""
             prefixNumber = ""
             Indicator.Vim.Executed()
@@ -180,7 +182,7 @@ function modal:entered()
 end
 
 function modal:exited()
-    status.hide()
+    -- status.hide()
     Indicator.Vim.Close()
     Indicator.ShowMachinaIcon()
     master_eventtap.unregister(vim_handler)

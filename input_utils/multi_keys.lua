@@ -24,7 +24,7 @@ local multiKeyMap = {
     ["alt-l"] = { key = "right", mods = {"alt"} },
     ["alt-i"] = { key = "up", mods = {"alt"} },
     ["alt-h"] = { key = "left", mods = {"alt", "shift"} },
-    ["alt-;"] = { key = "right", mods = {"alt", "shift"} },
+    ["alt-§"] = { key = "right", mods = {"alt", "shift"} },
     ["alt-u"] = { key = "pageup", mods = {} },
     ["alt-o"] = { key = "pagedown", mods = {} },
     ["alt-y"] = { key = "up", mods = {"cmd"} },

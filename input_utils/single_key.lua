@@ -6,19 +6,22 @@ local master_eventtap = require("master_eventtap")
 
 -- 无修饰键映射
 local noModMap = {
-    ["'"] = "=",
+    -- ["'"] = "=",
+    ["/"] = "!",
 }
 
 -- shift组合键映射
 local shiftModMap = {
     -- ["-"] = "+",
+    -- ["§"] = ":", 会被vim的launcher影响，多发送一个shift事件，改用karabiner设置
+    ["="] = "\"",
 }
 
 -- alt组合键映射
 local altModMap = {
     ["-"] = {mods = {"shift"}, key = "2"},
-    ["'"] = ";",
-    ["/"] = "!",
+    -- ["'"] = ";",
+    -- ["/"] = "!",
     ["["] = "'",
     ["]"] = "`",
     ["\\"] = "~",
@@ -74,5 +77,10 @@ end
 
 -- ================================================ 注册到master_eventtap
 master_eventtap.register(handleSingleKey)
+
+-- hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
+--   hs.alert.show("KeyCode: " .. event:getKeyCode())
+--   return false
+-- end):start()
 
 return {}
