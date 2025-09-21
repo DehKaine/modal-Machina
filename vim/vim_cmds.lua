@@ -59,6 +59,9 @@ vim_cmds.map = {
         hs.eventtap.keyStroke({"ctrl", "cmd"}, "q", 0)
     end,
     -------------------------------------------- focus app by cmd
+    ["ff"] = function()
+				win_flow.focusLastApp()
+    end,
     ["fw"] = function()
         win_flow.focusToAppByCmd("fw")
     end,

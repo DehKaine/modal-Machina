@@ -38,6 +38,13 @@ function win_flow.focusToAppByCmd(cmd)
     end
 end
 
+function win_flow.focusLastApp()
+		hs.eventtap.event.newKeyEvent("cmd", true):post()
+		hs.eventtap.event.newKeyEvent("tab", true):post()
+		hs.eventtap.event.newKeyEvent("cmd", false):post()
+		hs.eventtap.event.newKeyEvent("tab", false):post()
+end
+
 function win_flow.restoreFrontmostApp()
     local app = hs.application.frontmostApplication()
     if app then
