@@ -1,16 +1,16 @@
 local win_flow = {}
 
 local focus_map = {
-    fw = "WeChat.app",
-    fi = "iTerm.app",
-    ft = "Terminal.app",
-    fI = "Finder",
+		fc = "ChatGPT",
+		fe = "Eagle",
+		fg = "Google Chrome",
+		fi = "iTerm.app",
+		fI = "Finder",
     fo = "Fork",
     fp = "Adobe Photoshop 2021",
-    fe = "Eagle",
-    fc = "ChatGPT",
-    fg = "Google Chrome",
+		ft = "Terminal.app",
     fv = "Visual Studio Code",
+		fw = "WeChat.app",
 }
 
 local function restoreMinimizedWindows(app)
