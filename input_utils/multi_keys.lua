@@ -58,15 +58,22 @@ master_eventtap.register(handleMultiKey)
 
 -- haycl3n's personal keymap
 
+-- 优雅且无闪烁的输入法切换函数 (解决焦点错乱与切窗口闪烁)
+local function switchInputMethod()
+    local sogou = "com.sogou.inputmethod.sogou.pinyin"
+    local abc   = "com.apple.keylayout.ABC"
+    
+    local current = hs.keycodes.currentSourceID()
+    local targetIM = (current ~= sogou) and sogou or abc
+
+    hs.keycodes.currentSourceID(targetIM)
+
+    -- 微刷当前焦点输入框的 Text Context，刷新焦点且不闪烁屏幕
+    hs.eventtap.event.newEventWithType(hs.eventtap.event.types.flagsChanged, 0):post()
+end
+
 hs.hotkey.bind({"shift"}, "space", function()
-    local current = hs.execute("/opt/homebrew/bin/ims-mac", true):gsub("%s+", "")
-    local targetIM = nil
-    if current ~= "com.sogou.inputmethod.sogou.pinyin" then
-        targetIM = "com.sogou.inputmethod.sogou.pinyin"
-    else
-        targetIM = "com.apple.keylayout.ABC"
-    end
-    hs.execute("ims-mac " .. targetIM, true)
+    switchInputMethod()
 end)
 
 local function simulatePsZoom(delta)
